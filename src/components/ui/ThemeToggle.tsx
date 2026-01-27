@@ -192,7 +192,7 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
                         {isActive && (
                             <motion.div
                                 layoutId="activeTheme"
-                                className="absolute inset-0 bg-white dark:bg-neutral-700 rounded-lg shadow-sm"
+                                className="absolute inset-0 bg-white dark:bg-neutral-700 rounded-lg "
                                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                             />
                         )}

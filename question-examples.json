@@ -1,0 +1,1245 @@
+{
+  "question_types": [
+    "MCQ",
+    "MCMA",
+    "SC",
+    "SUC",
+    "SUC_WITH_WORDLIST",
+    "NC",
+    "TC",
+    "FC",
+    "FCC",
+    "TFNG",
+    "YNNG",
+    "MH",
+    "MI",
+    "MF",
+    "SA",
+    "ML",
+    "DL"
+  ],
+  "examples": {
+    "MCQ": {
+      "title": "Questions 1-4",
+      "question_type": "MCQ",
+      "description": "Choose the correct letter, A, B, C or D.",
+      "question_data": {},
+      "questions": [
+        {
+          "order": 1,
+          "text": "What is the main purpose of the study described in the passage?",
+          "correct_answer": "C",
+          "choices": [
+            {
+              "key": "A",
+              "text": "To compare different teaching methods"
+            },
+            {
+              "key": "B",
+              "text": "To evaluate student performance"
+            },
+            {
+              "key": "C",
+              "text": "To investigate the effects of sleep on memory"
+            },
+            {
+              "key": "D",
+              "text": "To analyze learning disabilities"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "text": "According to the passage, what did researchers discover about REM sleep?",
+          "correct_answer": "B",
+          "choices": [
+            {
+              "key": "A",
+              "text": "It has no effect on memory consolidation"
+            },
+            {
+              "key": "B",
+              "text": "It plays a crucial role in processing emotional memories"
+            },
+            {
+              "key": "C",
+              "text": "It only occurs in young children"
+            },
+            {
+              "key": "D",
+              "text": "It decreases with age in all subjects"
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "text": "The writer suggests that the findings could be applied to",
+          "correct_answer": "A",
+          "choices": [
+            {
+              "key": "A",
+              "text": "improving educational practices"
+            },
+            {
+              "key": "B",
+              "text": "treating sleep disorders"
+            },
+            {
+              "key": "C",
+              "text": "designing new medications"
+            },
+            {
+              "key": "D",
+              "text": "understanding dream interpretation"
+            }
+          ]
+        }
+      ]
+    },
+    "MCMA": {
+      "title": "Questions 5-7",
+      "question_type": "MCMA",
+      "description": "Choose THREE letters, A-G. Which THREE of the following are mentioned as benefits of urban green spaces?",
+      "question_data": {},
+      "questions": [
+        {
+          "order": 5,
+          "text": "Which THREE of the following are mentioned as benefits of urban green spaces?",
+          "correct_answer": "ACE",
+          "choices": [
+            {
+              "key": "A",
+              "text": "Improved air quality"
+            },
+            {
+              "key": "B",
+              "text": "Increased property taxes"
+            },
+            {
+              "key": "C",
+              "text": "Reduced stress levels"
+            },
+            {
+              "key": "D",
+              "text": "Higher crime rates"
+            },
+            {
+              "key": "E",
+              "text": "Enhanced biodiversity"
+            },
+            {
+              "key": "F",
+              "text": "Louder noise levels"
+            },
+            {
+              "key": "G",
+              "text": "Decreased community interaction"
+            }
+          ]
+        }
+      ]
+    },
+    "SC": {
+      "title": "Questions 21-23",
+      "question_type": "SC",
+      "description": "Complete the sentences below. Write NO MORE THAN THREE WORDS from the passage for each answer.",
+      "question_data": {},
+      "questions": [
+        {
+          "order": 21,
+          "text": "The capital of Australia is <input>.",
+          "correct_answer": "Canberra"
+        },
+        {
+          "order": 22,
+          "text": "The chemical symbol for gold is <input>.",
+          "correct_answer": "Au"
+        },
+        {
+          "order": 23,
+          "text": "Shakespeare was born in <input>.",
+          "correct_answer": "Stratford-upon-Avon|Stratford upon Avon"
+        }
+      ]
+    },
+    "SUC": {
+      "title": "Questions 16-20",
+      "question_type": "SUC",
+      "description": "Complete the summary below. Write NO MORE THAN TWO WORDS from the passage for each answer.",
+      "question_data": {
+        "title": "The Life Cycle of Salmon",
+        "text": "Salmon begin their lives in freshwater <input> where they hatch from eggs. After spending several months in the river, young salmon undergo a process called <input> which prepares them for life in the ocean. They then migrate to the <input> where they spend most of their adult lives feeding and growing. When ready to reproduce, salmon return to their <input> using their remarkable sense of smell. The journey upstream is extremely <input>, and many salmon die after spawning.",
+        "blankCount": 5
+      },
+      "questions": [
+        {
+          "order": 16,
+          "question_text": "Salmon begin their lives in freshwater <input>",
+          "correct_answer": "streams|rivers"
+        },
+        {
+          "order": 17,
+          "question_text": "a process called <input> which prepares them",
+          "correct_answer": "smoltification"
+        },
+        {
+          "order": 18,
+          "question_text": "They then migrate to the <input>",
+          "correct_answer": "ocean|sea"
+        },
+        {
+          "order": 19,
+          "question_text": "salmon return to their <input>",
+          "correct_answer": "birthplace|natal streams"
+        },
+        {
+          "order": 20,
+          "question_text": "The journey upstream is extremely <input>",
+          "correct_answer": "demanding|exhausting"
+        }
+      ]
+    },
+    "SUC_WITH_WORDLIST": {
+      "title": "Questions 36-40",
+      "question_type": "SUC",
+      "description": "Complete the summary using the list of words, A-I, below.",
+      "question_data": {
+        "title": "The Development of Writing Systems",
+        "text": "The earliest writing systems emerged around 3200 BCE in <input>. These initial scripts were primarily used for <input> purposes such as recording trade transactions. Over time, writing evolved from simple <input> representing objects to more abstract symbols. The invention of the <input> around 1500 BCE made writing more accessible as it required memorizing fewer symbols. This development significantly increased <input> rates across ancient societies.",
+        "blankCount": 5,
+        "word_list": [
+          {
+            "key": "A",
+            "text": "Mesopotamia"
+          },
+          {
+            "key": "B",
+            "text": "pictographs"
+          },
+          {
+            "key": "C",
+            "text": "alphabet"
+          },
+          {
+            "key": "D",
+            "text": "administrative"
+          },
+          {
+            "key": "E",
+            "text": "literacy"
+          },
+          {
+            "key": "F",
+            "text": "Egypt"
+          },
+          {
+            "key": "G",
+            "text": "religious"
+          },
+          {
+            "key": "H",
+            "text": "phonetic"
+          },
+          {
+            "key": "I",
+            "text": "communication"
+          }
+        ]
+      },
+      "questions": [
+        {
+          "order": 36,
+          "question_text": "emerged around 3200 BCE in <input>",
+          "correct_answer": "A"
+        },
+        {
+          "order": 37,
+          "question_text": "were primarily used for <input> purposes",
+          "correct_answer": "D"
+        },
+        {
+          "order": 38,
+          "question_text": "evolved from simple <input> representing objects",
+          "correct_answer": "B"
+        },
+        {
+          "order": 39,
+          "question_text": "The invention of the <input> around 1500 BCE",
+          "correct_answer": "C"
+        },
+        {
+          "order": 40,
+          "question_text": "significantly increased <input> rates",
+          "correct_answer": "E"
+        }
+      ]
+    },
+    "NC": {
+      "title": "Questions 30-35",
+      "question_type": "NC",
+      "description": "Complete the notes below. Write NO MORE THAN TWO WORDS for each answer.",
+      "question_data": {
+        "title": "Marine Conservation Efforts",
+        "items": [
+          {
+            "title": "Threats to Marine Ecosystems",
+            "items": [
+              "Overfishing depletes <input> populations",
+              {
+                "title": "Pollution sources:",
+                "items": [
+                  "plastic waste from <input>",
+                  "chemical runoff from <input>",
+                  "oil spills from shipping"
+                ]
+              },
+              "Climate change causes ocean <input>"
+            ]
+          },
+          {
+            "title": "Conservation Strategies",
+            "items": [
+              "Establishment of marine <input> areas",
+              "Sustainable fishing <input> enforcement",
+              {
+                "title": "Community involvement:",
+                "items": [
+                  "education programs",
+                  "beach cleanup initiatives"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "questions": [
+        {
+          "order": 30,
+          "text": "Overfishing depletes ___ populations",
+          "correct_answer": "fish|marine"
+        },
+        {
+          "order": 31,
+          "text": "plastic waste from ___",
+          "correct_answer": "households|cities"
+        },
+        {
+          "order": 32,
+          "text": "chemical runoff from ___",
+          "correct_answer": "agriculture|farms"
+        },
+        {
+          "order": 33,
+          "text": "Climate change causes ocean ___",
+          "correct_answer": "acidification|warming"
+        },
+        {
+          "order": 34,
+          "text": "Establishment of marine ___ areas",
+          "correct_answer": "protected|conservation"
+        },
+        {
+          "order": 35,
+          "text": "Sustainable fishing ___ enforcement",
+          "correct_answer": "quota|regulations"
+        }
+      ]
+    },
+    "TC": {
+      "title": "Questions 26-30",
+      "question_type": "TC",
+      "description": "Complete the table below. Write NO MORE THAN TWO WORDS for each answer.",
+      "question_data": {
+        "items": [
+          [
+            "Renewable Energy Source",
+            "Main Advantage",
+            "Main Disadvantage",
+            "Best Location"
+          ],
+          [
+            "Solar Power",
+            "Clean and <input>",
+            "Depends on <input>",
+            "Desert regions"
+          ],
+          [
+            "Wind Energy",
+            "No <input> emissions",
+            "Visual and noise <input>",
+            "Coastal areas"
+          ],
+          [
+            "Hydroelectric",
+            "Reliable and <input>",
+            "Requires dam <input>",
+            "Mountainous regions"
+          ],
+          [
+            "Geothermal",
+            "Available <input>",
+            "Limited to volcanic areas",
+            "Near <input> boundaries"
+          ]
+        ]
+      },
+      "questions": [
+        {
+          "order": 26,
+          "text": "Solar Power - Main Advantage",
+          "correct_answer": "abundant|renewable"
+        },
+        {
+          "order": 27,
+          "text": "Solar Power - Main Disadvantage",
+          "correct_answer": "weather|sunlight"
+        },
+        {
+          "order": 28,
+          "text": "Wind Energy - Main Advantage",
+          "correct_answer": "carbon|greenhouse"
+        },
+        {
+          "order": 29,
+          "text": "Wind Energy - Main Disadvantage",
+          "correct_answer": "pollution|impact"
+        },
+        {
+          "order": 30,
+          "text": "Hydroelectric - Main Advantage",
+          "correct_answer": "consistent|predictable"
+        }
+      ]
+    },
+    "FC": {
+      "title": "Questions 1-6",
+      "question_type": "FC",
+      "description": "Complete the form below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.",
+      "example": {
+        "question": "Type of membership",
+        "answer": "annual",
+        "explanation": "The customer says they want to sign up for a yearly membership."
+      },
+      "question_data": {
+        "title": "Gym Membership Application",
+        "items": [
+          {
+            "title": "Personal Details",
+            "items": [
+              "Full name: <input>",
+              "Date of birth: <input>",
+              "Address: 45 <input> Road",
+              "Contact number: <input>"
+            ]
+          },
+          {
+            "title": "Membership Information",
+            "items": [
+              "Start date: <input>",
+              "Preferred training time: <input>"
+            ]
+          }
+        ]
+      },
+      "questions": [
+        {
+          "order": 1,
+          "text": "Full name",
+          "correct_answer": "David Chen|David CHEN"
+        },
+        {
+          "order": 2,
+          "text": "Date of birth",
+          "correct_answer": "15 March 1990|15/03/1990"
+        },
+        {
+          "order": 3,
+          "text": "Address - Road name",
+          "correct_answer": "Riverside|RIVERSIDE"
+        },
+        {
+          "order": 4,
+          "text": "Contact number",
+          "correct_answer": "07845 329174|07845329174"
+        },
+        {
+          "order": 5,
+          "text": "Start date",
+          "correct_answer": "1st January|1 January|January 1st"
+        },
+        {
+          "order": 6,
+          "text": "Preferred training time",
+          "correct_answer": "mornings|early morning"
+        }
+      ]
+    },
+    "FCC": {
+      "title": "Questions 15-20",
+      "question_type": "FCC",
+      "description": "Complete the flow chart below. Write NO MORE THAN TWO WORDS for each answer.",
+      "question_data": {
+        "title": "Coffee Production Process",
+        "flow_description": "The flow chart shows the main stages in coffee production from harvesting to packaging.",
+        "steps": [
+          {
+            "step_number": 1,
+            "text": "Coffee cherries are <input> when they turn red",
+            "blank_position": 1
+          },
+          {
+            "step_number": 2,
+            "text": "Cherries are processed using either the <input> or wet method",
+            "blank_position": 2
+          },
+          {
+            "step_number": 3,
+            "text": "Beans are dried until moisture content reaches <input>%",
+            "blank_position": 3
+          },
+          {
+            "step_number": 4,
+            "text": "Outer layers removed during <input> process",
+            "blank_position": 4
+          },
+          {
+            "step_number": 5,
+            "text": "Beans sorted by <input> and quality",
+            "blank_position": 5
+          },
+          {
+            "step_number": 6,
+            "text": "Final product sent for <input> and distribution",
+            "blank_position": 6
+          }
+        ]
+      },
+      "questions": [
+        {
+          "order": 15,
+          "text": "Coffee cherries are ___ when they turn red",
+          "correct_answer": "harvested|picked"
+        },
+        {
+          "order": 16,
+          "text": "processed using either the ___ or wet method",
+          "correct_answer": "dry|natural"
+        },
+        {
+          "order": 17,
+          "text": "dried until moisture content reaches ___%",
+          "correct_answer": "11|12"
+        },
+        {
+          "order": 18,
+          "text": "Outer layers removed during ___ process",
+          "correct_answer": "hulling|milling"
+        },
+        {
+          "order": 19,
+          "text": "Beans sorted by ___ and quality",
+          "correct_answer": "size|weight"
+        },
+        {
+          "order": 20,
+          "text": "Final product sent for ___ and distribution",
+          "correct_answer": "roasting|packaging"
+        }
+      ]
+    },
+    "TFNG": {
+      "title": "Questions 8-13",
+      "question_type": "TFNG",
+      "description": "Do the following statements agree with the information given in the passage? Write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, NOT GIVEN if there is no information on this.",
+      "question_data": {},
+      "questions": [
+        {
+          "order": 8,
+          "text": "The first electric cars were developed in the late 19th century.",
+          "correct_answer": "TRUE"
+        },
+        {
+          "order": 9,
+          "text": "Electric vehicles are more expensive to maintain than petrol cars.",
+          "correct_answer": "FALSE"
+        },
+        {
+          "order": 10,
+          "text": "The government plans to ban all petrol cars by 2030.",
+          "correct_answer": "NOT GIVEN"
+        },
+        {
+          "order": 11,
+          "text": "Battery technology has improved significantly in recent years.",
+          "correct_answer": "TRUE"
+        },
+        {
+          "order": 12,
+          "text": "Most charging stations are located in rural areas.",
+          "correct_answer": "FALSE"
+        },
+        {
+          "order": 13,
+          "text": "Electric car sales will exceed petrol car sales by 2025.",
+          "correct_answer": "NOT GIVEN"
+        }
+      ]
+    },
+    "YNNG": {
+      "title": "Questions 1-6",
+      "question_type": "YNNG",
+      "description": "Do the following statements agree with the views of the writer in the passage? Write YES if the statement agrees with the views of the writer, NO if the statement contradicts the views of the writer, NOT GIVEN if it is impossible to say what the writer thinks about this.",
+      "question_data": {},
+      "questions": [
+        {
+          "order": 1,
+          "text": "The author believes that social media has had a positive impact on society.",
+          "correct_answer": "NO"
+        },
+        {
+          "order": 2,
+          "text": "According to the writer, young people spend too much time online.",
+          "correct_answer": "YES"
+        },
+        {
+          "order": 3,
+          "text": "The writer thinks that governments should regulate social media platforms.",
+          "correct_answer": "YES"
+        },
+        {
+          "order": 4,
+          "text": "The author suggests that face-to-face communication is becoming obsolete.",
+          "correct_answer": "NO"
+        },
+        {
+          "order": 5,
+          "text": "The writer believes that social media companies prioritize user safety.",
+          "correct_answer": "NO"
+        },
+        {
+          "order": 6,
+          "text": "According to the author, older generations understand the risks of social media.",
+          "correct_answer": "NOT GIVEN"
+        }
+      ]
+    },
+    "MH": {
+      "title": "Questions 1-7",
+      "question_type": "MH",
+      "description": "The passage has seven paragraphs, A-G. Choose the correct heading for each paragraph from the list of headings below.",
+      "question_data": {
+        "options": [
+          {
+            "value": "i",
+            "label": "The decline of traditional farming methods"
+          },
+          {
+            "value": "ii",
+            "label": "Government initiatives to support agriculture"
+          },
+          {
+            "value": "iii",
+            "label": "The impact of climate change on crop yields"
+          },
+          {
+            "value": "iv",
+            "label": "Modern technology in farming"
+          },
+          {
+            "value": "v",
+            "label": "The economic importance of agriculture"
+          },
+          {
+            "value": "vi",
+            "label": "Challenges facing small-scale farmers"
+          },
+          {
+            "value": "vii",
+            "label": "Organic farming as a sustainable alternative"
+          },
+          {
+            "value": "viii",
+            "label": "The global demand for food production"
+          },
+          {
+            "value": "ix",
+            "label": "Water management in agricultural regions"
+          },
+          {
+            "value": "x",
+            "label": "The role of education in farming communities"
+          }
+        ],
+        "note": "NB There are more headings than paragraphs, so you will not use them all."
+      },
+      "questions": [
+        {
+          "order": 1,
+          "text": "Paragraph A",
+          "correct_answer": "v"
+        },
+        {
+          "order": 2,
+          "text": "Paragraph B",
+          "correct_answer": "viii"
+        },
+        {
+          "order": 3,
+          "text": "Paragraph C",
+          "correct_answer": "iii"
+        },
+        {
+          "order": 4,
+          "text": "Paragraph D",
+          "correct_answer": "iv"
+        },
+        {
+          "order": 5,
+          "text": "Paragraph E",
+          "correct_answer": "vi"
+        },
+        {
+          "order": 6,
+          "text": "Paragraph F",
+          "correct_answer": "vii"
+        },
+        {
+          "order": 7,
+          "text": "Paragraph G",
+          "correct_answer": "ii"
+        }
+      ],
+      "example": {
+        "question": "Paragraph A",
+        "answer": "v",
+        "explanation": "Paragraph A discusses how agriculture contributes to the national economy and provides employment."
+      }
+    },
+    "MI": {
+      "title": "Questions 14-19",
+      "question_type": "MI",
+      "description": "Which paragraph contains the following information? Write the correct letter, A-H, in boxes 14-19 on your answer sheet. NB You may use any letter more than once.",
+      "question_data": {
+        "options": [
+          {
+            "value": "A",
+            "label": "Paragraph A"
+          },
+          {
+            "value": "B",
+            "label": "Paragraph B"
+          },
+          {
+            "value": "C",
+            "label": "Paragraph C"
+          },
+          {
+            "value": "D",
+            "label": "Paragraph D"
+          },
+          {
+            "value": "E",
+            "label": "Paragraph E"
+          },
+          {
+            "value": "F",
+            "label": "Paragraph F"
+          },
+          {
+            "value": "G",
+            "label": "Paragraph G"
+          },
+          {
+            "value": "H",
+            "label": "Paragraph H"
+          }
+        ]
+      },
+      "questions": [
+        {
+          "order": 14,
+          "text": "A reference to the financial investment required for space exploration",
+          "correct_answer": "C"
+        },
+        {
+          "order": 15,
+          "text": "An explanation of why some scientists oppose certain missions",
+          "correct_answer": "F"
+        },
+        {
+          "order": 16,
+          "text": "Details of a recent breakthrough in propulsion technology",
+          "correct_answer": "D"
+        },
+        {
+          "order": 17,
+          "text": "A comparison between different space agencies' approaches",
+          "correct_answer": "B"
+        },
+        {
+          "order": 18,
+          "text": "The potential benefits for life on Earth",
+          "correct_answer": "G"
+        },
+        {
+          "order": 19,
+          "text": "Historical context for current space programs",
+          "correct_answer": "A"
+        }
+      ]
+    },
+    "MF": {
+      "title": "Questions 20-25",
+      "question_type": "MF",
+      "description": "Look at the following statements and the list of researchers below. Match each statement with the correct researcher, A-E. Write the correct letter, A-E, in boxes 20-25 on your answer sheet. NB You may use any letter more than once.",
+      "question_data": {
+        "options": [
+          {
+            "value": "A",
+            "label": "Dr. Sarah Mitchell"
+          },
+          {
+            "value": "B",
+            "label": "Professor James Wong"
+          },
+          {
+            "value": "C",
+            "label": "Dr. Elena Rodriguez"
+          },
+          {
+            "value": "D",
+            "label": "Professor David Thompson"
+          },
+          {
+            "value": "E",
+            "label": "Dr. Lisa Chen"
+          }
+        ]
+      },
+      "questions": [
+        {
+          "order": 20,
+          "text": "Language acquisition is primarily influenced by environmental factors.",
+          "correct_answer": "B"
+        },
+        {
+          "order": 21,
+          "text": "Children learn grammar through imitation of adult speech.",
+          "correct_answer": "A"
+        },
+        {
+          "order": 22,
+          "text": "There is a critical period for language development.",
+          "correct_answer": "C"
+        },
+        {
+          "order": 23,
+          "text": "Bilingual children show cognitive advantages over monolingual peers.",
+          "correct_answer": "E"
+        },
+        {
+          "order": 24,
+          "text": "Language learning ability declines sharply after puberty.",
+          "correct_answer": "C"
+        },
+        {
+          "order": 25,
+          "text": "Social interaction is essential for language development.",
+          "correct_answer": "D"
+        }
+      ]
+    },
+    "SA": {
+      "title": "Questions 37-40",
+      "question_type": "SA",
+      "description": "Answer the questions below. Write NO MORE THAN THREE WORDS for each answer.",
+      "question_data": {},
+      "questions": [
+        {
+          "order": 37,
+          "text": "What type of material is used to construct the outer shell of the building?",
+          "correct_answer": "recycled glass|glass panels"
+        },
+        {
+          "order": 38,
+          "text": "How many floors does the main tower have?",
+          "correct_answer": "52|fifty-two|fifty two"
+        },
+        {
+          "order": 39,
+          "text": "What feature helps to reduce energy consumption in the building?",
+          "correct_answer": "solar panels|natural ventilation"
+        },
+        {
+          "order": 40,
+          "text": "When is the building scheduled to be completed?",
+          "correct_answer": "2025|next year|December 2025"
+        }
+      ]
+    },
+    "ML": {
+      "title": "Questions 11-15",
+      "question_type": "ML",
+      "description": "Label the map below. Write the correct letter, A-I, next to questions 11-15.",
+      "question_data": {
+        "title": "Hillside Nature Reserve",
+        "description": "The map shows the layout of Hillside Nature Reserve and its facilities.",
+        "labelCount": 5,
+        "labels": [
+          {
+            "name": "Visitor Centre",
+            "correctAnswer": "B"
+          },
+          {
+            "name": "Bird Hide",
+            "correctAnswer": "E"
+          },
+          {
+            "name": "Picnic Area",
+            "correctAnswer": "G"
+          },
+          {
+            "name": "Car Park",
+            "correctAnswer": "A"
+          },
+          {
+            "name": "Children's Playground",
+            "correctAnswer": "F"
+          }
+        ],
+        "note": "Image of map needs to be uploaded separately - map should show locations marked A-I"
+      },
+      "questions": [
+        {
+          "order": 11,
+          "text": "Visitor Centre",
+          "correct_answer": "B"
+        },
+        {
+          "order": 12,
+          "text": "Bird Hide",
+          "correct_answer": "E"
+        },
+        {
+          "order": 13,
+          "text": "Picnic Area",
+          "correct_answer": "G"
+        },
+        {
+          "order": 14,
+          "text": "Car Park",
+          "correct_answer": "A"
+        },
+        {
+          "order": 15,
+          "text": "Children's Playground",
+          "correct_answer": "F"
+        }
+      ]
+    },
+    "DL": {
+      "title": "Questions 31-35",
+      "question_type": "DL",
+      "description": "Label the diagram below. Write NO MORE THAN TWO WORDS for each answer.",
+      "has_visual": true,
+      "question_data": {
+        "title": "Cross-Section of a Wind Turbine",
+        "visual_description": "The diagram shows a cross-section of a horizontal axis wind turbine with labeled parts including the rotor blades, nacelle, tower, and foundation. Arrows indicate the direction of wind flow and the rotation of components.",
+        "labelCount": 5,
+        "labels": [
+          {
+            "name": "Component that converts kinetic energy to electrical energy",
+            "correctAnswer": "generator"
+          },
+          {
+            "name": "Housing that contains the main mechanical components",
+            "correctAnswer": "nacelle"
+          },
+          {
+            "name": "System that adjusts blade angle",
+            "correctAnswer": "pitch control"
+          },
+          {
+            "name": "Component that increases rotational speed",
+            "correctAnswer": "gearbox"
+          },
+          {
+            "name": "Structure that supports the entire turbine",
+            "correctAnswer": "tower|foundation"
+          }
+        ],
+        "note": "Image of diagram needs to be uploaded separately - diagram should show wind turbine components with numbered labels 31-35"
+      },
+      "questions": [
+        {
+          "order": 31,
+          "text": "Component that converts kinetic energy to electrical energy",
+          "correct_answer": "generator"
+        },
+        {
+          "order": 32,
+          "text": "Housing that contains the main mechanical components",
+          "correct_answer": "nacelle"
+        },
+        {
+          "order": 33,
+          "text": "System that adjusts blade angle",
+          "correct_answer": "pitch control"
+        },
+        {
+          "order": 34,
+          "text": "Component that increases rotational speed",
+          "correct_answer": "gearbox"
+        },
+        {
+          "order": 35,
+          "text": "Structure that supports the entire turbine",
+          "correct_answer": "tower|foundation"
+        }
+      ]
+    }
+  },
+  "reading_types": [
+    "MCQ",
+    "MCMA",
+    "TFNG",
+    "YNNG",
+    "MH",
+    "MI",
+    "MF",
+    "SC",
+    "SUC",
+    "SUC_WITH_WORDLIST",
+    "NC",
+    "TC",
+    "SA",
+    "DL"
+  ],
+  "listening_types": [
+    "MCQ",
+    "MCMA",
+    "SA",
+    "FC",
+    "NC",
+    "TC",
+    "SUC",
+    "SUC_WITH_WORDLIST",
+    "ML",
+    "DL",
+    "FCC",
+    "MF"
+  ],
+  "validation_hints": {
+    "MCQ": {
+      "answer_format": "Single letter: A, B, C, or D",
+      "common_errors": [
+        "Using lowercase letters (should be uppercase)",
+        "Including option text instead of just the letter",
+        "Missing 'choices' array in output"
+      ],
+      "validation_rules": [
+        "correct_answer must be exactly one uppercase letter",
+        "choices array must have 3-4 options with 'key' and 'text'",
+        "Only one choice should be correct"
+      ]
+    },
+    "MCMA": {
+      "answer_format": "Concatenated letters without spaces: ACE, BDF, ABDE",
+      "common_errors": [
+        "Using commas or spaces between letters (A, C, E instead of ACE)",
+        "Listing fewer than 2 correct answers",
+        "Not sorting letters alphabetically"
+      ],
+      "validation_rules": [
+        "correct_answer must be 2+ uppercase letters concatenated",
+        "Letters should be in alphabetical order (ACE not CAE)",
+        "choices array must have 5-7 options"
+      ]
+    },
+    "TFNG": {
+      "answer_format": "Exact uppercase: TRUE, FALSE, or NOT GIVEN",
+      "common_errors": [
+        "Using lowercase (true instead of TRUE)",
+        "Using abbreviations (T, F, NG)",
+        "Using 'Not Given' instead of 'NOT GIVEN'"
+      ],
+      "validation_rules": [
+        "Answers must be exactly: TRUE, FALSE, or NOT GIVEN",
+        "Used for FACTUAL statements only",
+        "Check if statement can be verified from passage facts"
+      ]
+    },
+    "YNNG": {
+      "answer_format": "Exact uppercase: YES, NO, or NOT GIVEN",
+      "common_errors": [
+        "Confusing with TFNG (using TRUE/FALSE)",
+        "Using lowercase",
+        "Using abbreviations (Y, N, NG)"
+      ],
+      "validation_rules": [
+        "Answers must be exactly: YES, NO, or NOT GIVEN",
+        "Used for OPINION/VIEW statements only",
+        "Check if statement reflects writer's opinion"
+      ]
+    },
+    "SC": {
+      "answer_format": "Word(s) from passage, alternatives separated by |",
+      "common_errors": [
+        "Confusing with SUC (sentences should be INDEPENDENT)",
+        "Including question numbers in <input> tags",
+        "Not providing alternative answers"
+      ],
+      "validation_rules": [
+        "Each sentence about DIFFERENT topic",
+        "No pronoun chains between sentences",
+        "Sentences can be reordered without losing meaning"
+      ]
+    },
+    "SUC": {
+      "answer_format": "Word(s) OR letter (if word_list provided)",
+      "common_errors": [
+        "Confusing with SC (check for pronoun chains)",
+        "Missing word_list when word bank is provided",
+        "Using word instead of letter when word_list exists"
+      ],
+      "validation_rules": [
+        "All sentences about SAME topic/entity",
+        "Pronoun chains present (The hotel... It... Guests...)",
+        "If word_list provided, answer must be the LETTER not word"
+      ]
+    },
+    "NC": {
+      "answer_format": "Word(s) for each blank in hierarchical structure",
+      "common_errors": [
+        "Flat structure instead of nested items",
+        "Using 'prefix' instead of 'title' for section headers",
+        "Question numbers in item text"
+      ],
+      "validation_rules": [
+        "Must have 'title' and 'items' in question_data",
+        "Section headers should use 'title' property (not 'prefix')",
+        "Items can be strings or nested objects with 'title'/'items'",
+        "Use <input> without numbers"
+      ]
+    },
+    "TC": {
+      "answer_format": "Word(s) for table cells",
+      "common_errors": [
+        "First row not being headers",
+        "Inconsistent column count across rows",
+        "Not using 2D array structure"
+      ],
+      "validation_rules": [
+        "items must be 2D array",
+        "First row = column headers",
+        "Cells can be strings or arrays for multi-line content"
+      ]
+    },
+    "FC": {
+      "answer_format": "Word(s) or number for form fields",
+      "common_errors": [
+        "Using 'prefix' instead of 'title' for section headers",
+        "Including question numbers after <input>",
+        "Not including example if one is provided"
+      ],
+      "validation_rules": [
+        "Main structure with 'title' (form name) and 'items'",
+        "Section headers should use 'title' property (not 'prefix')",
+        "Use <input> for blanks without numbers",
+        "Include 'example' field if PDF provides one"
+      ]
+    },
+    "FCC": {
+      "answer_format": "Word(s) for sequential process steps",
+      "common_errors": [
+        "Not showing sequential flow structure",
+        "Missing step numbers or flow description",
+        "Treating as regular completion instead of process"
+      ],
+      "validation_rules": [
+        "Must represent a SEQUENTIAL process",
+        "Include 'flow_description' or 'title' for context",
+        "Steps should be in logical order"
+      ]
+    },
+    "MH": {
+      "answer_format": "Roman numeral: i, ii, iii, iv, v, vi, vii, viii, ix, x",
+      "common_errors": [
+        "Using Arabic numerals (1, 2, 3) instead of Roman",
+        "Using uppercase Roman numerals (I, II, III)",
+        "Not having more headings than paragraphs"
+      ],
+      "validation_rules": [
+        "Answers must be lowercase Roman numerals",
+        "options array should have MORE headings than paragraphs",
+        "Include 'note' about unused headings"
+      ]
+    },
+    "MI": {
+      "answer_format": "Uppercase paragraph letter: A, B, C, D, E, F, G, H",
+      "common_errors": [
+        "Using lowercase letters",
+        "Not noting that letters can be reused",
+        "Missing paragraph labels in passage"
+      ],
+      "validation_rules": [
+        "Answers are UPPERCASE letters (A-H)",
+        "Same letter may be used more than once",
+        "Ensure passage has <strong>A</strong>, <strong>B</strong>... labels"
+      ]
+    },
+    "MF": {
+      "answer_format": "Letter matching person/theory: A, B, C, D, E",
+      "common_errors": [
+        "Using names instead of letters",
+        "Not extracting all people/theories from passage",
+        "Missing the matching criteria"
+      ],
+      "validation_rules": [
+        "Answer is letter corresponding to person/theory",
+        "options array lists all people/theories/categories",
+        "Same letter may be used more than once"
+      ]
+    },
+    "SA": {
+      "answer_format": "1-3 words, alternatives separated by |",
+      "common_errors": [
+        "Exceeding word limit",
+        "Not providing alternative acceptable answers",
+        "Including articles when not needed"
+      ],
+      "validation_rules": [
+        "Respect word limit from instructions",
+        "Use | for alternative answers",
+        "Include variations: singular/plural, with/without articles"
+      ]
+    },
+    "ML": {
+      "answer_format": "Letter from map: A, B, C, D, E, F, G, H, I",
+      "common_errors": [
+        "Using location names instead of letters",
+        "Missing 'labels' array structure",
+        "Not including 'note' about image upload"
+      ],
+      "validation_rules": [
+        "Answers are letters (A-I typically)",
+        "labels array: [{'name': 'Location', 'correctAnswer': 'A'}]",
+        "Include visual_description for context"
+      ]
+    },
+    "DL": {
+      "answer_format": "Word(s) labeling diagram parts",
+      "common_errors": [
+        "Confusing with ML (DL uses words, ML uses letters)",
+        "Missing visual_description",
+        "Not setting has_visual: true"
+      ],
+      "validation_rules": [
+        "Answer is word(s), not letters",
+        "Must include 'visual_description' in question_data",
+        "has_visual should be true",
+        "Include 'note' about image upload"
+      ]
+    }
+  }
+}

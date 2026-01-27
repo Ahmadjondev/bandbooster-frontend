@@ -199,7 +199,7 @@ export function PracticeListHeader({
 
         <div className="relative flex items-start md:items-center justify-between flex-col md:flex-row gap-4">
           <div className="flex items-center gap-4">
-            <div className={cn('w-14 h-14 rounded-2xl flex items-center justify-center', 'bg-white dark:bg-neutral-800 shadow-sm')}>
+            <div className={cn('w-14 h-14 rounded-2xl flex items-center justify-center', 'bg-white dark:bg-neutral-800 ')}>
               <IconComponent className={cn('w-7 h-7', config.color)} />
             </div>
             <div>
@@ -274,7 +274,7 @@ export function PracticeListHeader({
             className={cn(
               'p-2 rounded-lg transition-colors',
               viewMode === 'grid'
-                ? 'bg-white dark:bg-neutral-700 shadow-sm text-primary-600 dark:text-primary-400'
+                ? 'bg-white dark:bg-neutral-700  text-primary-600 dark:text-primary-400'
                 : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
             )}
           >
@@ -285,7 +285,7 @@ export function PracticeListHeader({
             className={cn(
               'p-2 rounded-lg transition-colors',
               viewMode === 'list'
-                ? 'bg-white dark:bg-neutral-700 shadow-sm text-primary-600 dark:text-primary-400'
+                ? 'bg-white dark:bg-neutral-700  text-primary-600 dark:text-primary-400'
                 : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
             )}
           >

@@ -150,8 +150,7 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
       className={cn(
         'fixed left-0 top-0 z-40 h-screen bg-white dark:bg-neutral-900',
         'border-r border-neutral-200 dark:border-neutral-800',
-        'flex flex-col',
-        'shadow-sm'
+        'flex flex-col'
       )}
     >
       {/* Logo Section */}
@@ -179,22 +178,7 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
           </AnimatePresence>
         </Link>
 
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onToggle}
-          className={cn(
-            'p-2 rounded-lg transition-colors',
-            'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-            'text-neutral-500 dark:text-neutral-400'
-          )}
-        >
-          {isCollapsed ? (
-            <icons.chevronRight className="w-5 h-5" />
-          ) : (
-            <icons.chevronLeft className="w-5 h-5" />
-          )}
-        </motion.button>
+
       </div>
 
       {/* Navigation */}
@@ -332,6 +316,25 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
           </div>
         ))}
       </nav>
+      {/* Collapse Toggle */}
+      <div className="border-t border-neutral-200 dark:border-neutral-800 p-3 flex justify-center">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onToggle}
+          className={cn(
+            'p-2 rounded-lg transition-colors',
+            'hover:bg-neutral-100 dark:hover:bg-neutral-800',
+            'text-neutral-500 dark:text-neutral-400'
+          )}
+        >
+          {isCollapsed ? (
+            <icons.chevronRight className="w-5 h-5" />
+          ) : (
+            <icons.chevronLeft className="w-5 h-5" />
+          )}
+        </motion.button>
+      </div>
 
     </motion.aside>
   );

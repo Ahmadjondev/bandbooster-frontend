@@ -198,7 +198,7 @@ export function AudioPlayer({
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
     return (
-        <div className={cn('bg-linear-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700', className)}>
+        <div className={cn('bg-linear-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800 rounded-xl p-4  border border-slate-200 dark:border-slate-700', className)}>
             {/* Hidden Audio Element */}
             <audio
                 ref={audioRef}

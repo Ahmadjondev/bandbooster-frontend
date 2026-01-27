@@ -50,11 +50,13 @@ import type {
   CompleteSpeakingResponse,
   SpeakingEvaluation,
   SectionStats,
+  SectionStatsBasic,
   UserStats,
   SectionAttemptBalance,
   AttemptBalanceResponse,
   SectionSpecificStats,
   SubmitAnswersRequest,
+  DifficultyLevel,
 } from '../models/domain';
 
 // ============= Overview Mappers =============
@@ -382,7 +384,7 @@ export function mapCompleteSpeakingResponseDTOToDomain(dto: CompleteSpeakingResp
 
 // ============= Stats Mappers =============
 
-export function mapSectionStatsDTOToDomain(dto: SectionStatsDTO): SectionStats {
+export function mapSectionStatsDTOToDomain(dto: SectionStatsDTO): SectionStatsBasic {
   return {
     sectionType: dto.section_type,
     totalAttempts: dto.total_attempts,
@@ -422,6 +424,16 @@ export function mapAttemptBalanceResponseDTOToDomain(dto: AttemptBalanceResponse
 }
 
 export function mapSectionSpecificStatsDTOToDomain(dto: SectionSpecificStatsDTO): SectionSpecificStats {
+  // Transform difficultyBreakdown from snake_case to camelCase
+  const difficultyBreakdown = Object.entries(dto.difficulty_breakdown).reduce((acc, [key, value]) => {
+    acc[key as DifficultyLevel] = {
+      completed: value.completed,
+      total: value.total,
+      averageScore: value.average_score,
+    };
+    return acc;
+  }, {} as Record<DifficultyLevel, { completed: number; total: number; averageScore: number | null }>);
+
   return {
     sectionType: dto.section_type,
     displayName: dto.display_name,
@@ -436,6 +448,6 @@ export function mapSectionSpecificStatsDTOToDomain(dto: SectionSpecificStatsDTO)
       date: new Date(sh.date),
       score: sh.score,
     })),
-    difficultyBreakdown: dto.difficulty_breakdown,
+    difficultyBreakdown,
   };
 }

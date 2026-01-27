@@ -8,7 +8,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { AudioPlayer } from './AudioPlayer';
-import { QuestionRenderer, type TestHead } from './QuestionRenderer';
+import { QuestionTypeFactory, type APITestHead } from './question-types';
 import { QuestionPalette, type PartInfo } from './QuestionPalette';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +20,7 @@ export interface ListeningContent {
     title: string;
     description: string;
     audio_url: string;
-    test_heads: TestHead[];
+    test_heads: APITestHead[];
     total_questions: number;
 }
 
@@ -66,8 +66,8 @@ export function ListeningSection({
     const [activePart, setActivePart] = useState(1);
     const [fontSize, setFontSize] = useState('text-base');
     const [focusedQuestionId, setFocusedQuestionId] = useState<number | null>(null);
+    const [audioPositions, setAudioPositions] = useState<Record<number, number>>({});
     const questionsContainerRef = useRef<HTMLDivElement>(null);
-    const audioStatesRef = useRef<Record<number, number>>({});
 
     // Sort contents by part number
     const sortedContents = useMemo(() => {
@@ -172,7 +172,14 @@ export function ListeningSection({
 
     // Handle audio time update - save progress
     const handleTimeUpdate = useCallback((partNumber: number, currentTime: number) => {
-        audioStatesRef.current[partNumber] = currentTime;
+        // Only update state if time changed significantly (every 5 seconds) to avoid re-renders
+        setAudioPositions(prev => {
+            const prevTime = prev[partNumber] || 0;
+            if (Math.abs(currentTime - prevTime) >= 5) {
+                return { ...prev, [partNumber]: currentTime };
+            }
+            return prev;
+        });
     }, []);
 
     if (!activeContent) {
@@ -193,7 +200,7 @@ export function ListeningSection({
                         partNumber={activeContent.part_number}
                         onEnded={() => handleAudioEnded(activeContent.part_number)}
                         onTimeUpdate={(time) => handleTimeUpdate(activeContent.part_number, time)}
-                        initialTime={audioStatesRef.current[activeContent.part_number] || 0}
+                        initialTime={audioPositions[activeContent.part_number] || 0}
                         autoPlay={autoPlayFirst && activeContent.part_number === sortedContents[0]?.part_number}
                     />
                 </div>
@@ -219,10 +226,10 @@ export function ListeningSection({
                         {activeContent.test_heads.map((group) => (
                             <div key={group.id} className="mb-8">
                                 <div className={cn(
-                                    'bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 shadow-sm',
+                                    'bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 ',
                                     fontSize
                                 )}>
-                                    <QuestionRenderer
+                                    <QuestionTypeFactory
                                         group={group}
                                         userAnswers={userAnswers}
                                         onAnswer={onAnswer}
@@ -231,6 +238,7 @@ export function ListeningSection({
                                             setTimeout(() => setFocusedQuestionId(null), 2000);
                                         }}
                                         fontSize={fontSize}
+                                        mode="listening"
                                     />
                                 </div>
                             </div>

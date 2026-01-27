@@ -318,7 +318,7 @@ export interface CompleteSpeakingResponse {
 
 // ============= Stats Models =============
 
-export interface SectionStats {
+export interface SectionStatsBasic {
   readonly sectionType: SectionType;
   readonly totalAttempts: number;
   readonly completedAttempts: number;
@@ -334,7 +334,7 @@ export interface UserStats {
   readonly totalCompleted: number;
   readonly overallAverageScore: number | null;
   readonly totalTimeSpentSeconds: number;
-  readonly sectionStats: SectionStats[];
+  readonly sectionStats: SectionStatsBasic[];
   readonly recentActivity: AttemptListItem[];
 }
 

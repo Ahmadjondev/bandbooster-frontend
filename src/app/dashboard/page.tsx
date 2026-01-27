@@ -214,7 +214,7 @@ export default function DashboardPage() {
             <motion.div
               whileHover={{ y: -2, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
-              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm"
+              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 "
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
@@ -230,7 +230,7 @@ export default function DashboardPage() {
             <motion.div
               whileHover={{ y: -2, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
-              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm"
+              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 "
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -246,7 +246,7 @@ export default function DashboardPage() {
             <motion.div
               whileHover={{ y: -2, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
-              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm"
+              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 "
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
@@ -264,7 +264,7 @@ export default function DashboardPage() {
             <motion.div
               whileHover={{ y: -2, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
-              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm"
+              className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 "
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
@@ -312,7 +312,7 @@ export default function DashboardPage() {
                   className={cn(
                     'relative bg-white dark:bg-neutral-900 rounded-2xl p-6',
                     'border border-neutral-200 dark:border-neutral-800',
-                    'shadow-sm transition-shadow',
+                    ' transition-shadow',
                     isAvailable && 'hover:shadow-lg cursor-pointer'
                   )}
                 >

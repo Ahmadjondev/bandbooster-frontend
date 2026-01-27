@@ -141,7 +141,9 @@ export interface GetPracticesBySectionParams {
   isPremium?: boolean;
   search?: string;
   sortBy?: 'newest' | 'oldest' | 'difficulty' | 'title';
-  // Section specific
+  // Test type filter - mutually exclusive with section-specific filters
+  testType?: 'FULL_TEST' | 'SECTION_PRACTICE';
+  // Section specific filters (only applicable when testType is not FULL_TEST)
   passageNumber?: number;
   partNumber?: number;
   chartType?: ChartType;
@@ -164,6 +166,9 @@ export async function getPracticesBySection(
   if (params.isPremium !== undefined) searchParams.set('is_premium', params.isPremium.toString());
   if (params.search) searchParams.set('search', params.search);
   if (params.sortBy) searchParams.set('sort_by', params.sortBy);
+  // Test type filter
+  if (params.testType) searchParams.set('test_type', params.testType);
+  // Section-specific filters (only applicable when testType is not FULL_TEST)
   if (params.passageNumber) searchParams.set('passage_number', params.passageNumber.toString());
   if (params.partNumber) searchParams.set('part_number', params.partNumber.toString());
   if (params.chartType) searchParams.set('chart_type', params.chartType);

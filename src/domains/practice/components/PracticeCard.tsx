@@ -116,7 +116,7 @@ export function PracticeCard({
       className={cn(
         'relative bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden',
         'border border-neutral-200 dark:border-neutral-800',
-        'shadow-sm hover:shadow-lg transition-shadow',
+        ' hover:shadow-lg transition-shadow',
         'group'
       )}
     >

@@ -79,7 +79,7 @@ export function QuestionPalette({
                                 <button
                                     onClick={() => onPartChange(part.partNumber)}
                                     className={cn(
-                                        'px-3 py-1.5 text-sm font-semibold rounded-lg transition-all whitespace-nowrap shadow-sm',
+                                        'px-3 py-1.5 text-sm font-semibold rounded-lg transition-all whitespace-nowrap ',
                                         activePart === part.partNumber
                                             ? 'bg-primary-600 dark:bg-primary-500 text-white'
                                             : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-200 dark:border-transparent'

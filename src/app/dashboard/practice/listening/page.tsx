@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePracticesBySection } from '@/domains/practice/queries/practice.queries';
-import type { DifficultyLevel } from '@/domains/practice/models/domain';
+import type { DifficultyLevel, TestType } from '@/domains/practice/models/domain';
 import { cn } from '@/lib/utils';
 
 // Icons as inline components for better performance
@@ -71,6 +71,13 @@ const ChevronRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const ChartIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 3v18h18" />
+    <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+  </svg>
+);
+
 const ITEMS_PER_PAGE = 12;
 
 const difficultyConfig: Record<string, { label: string; color: string }> = {
@@ -84,6 +91,7 @@ export default function ListeningPracticePage() {
   const [page, setPage] = useState(1);
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel | null>(null);
   const [selectedPart, setSelectedPart] = useState<number | null>(null);
+  const [selectedTestType, setSelectedTestType] = useState<TestType | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const queryParams = useMemo(() => ({
@@ -91,8 +99,9 @@ export default function ListeningPracticePage() {
     pageSize: ITEMS_PER_PAGE,
     difficulty: selectedDifficulty ?? undefined,
     partNumber: selectedPart ?? undefined,
+    testType: selectedTestType ?? undefined,
     search: searchQuery || undefined,
-  }), [page, selectedDifficulty, selectedPart, searchQuery]);
+  }), [page, selectedDifficulty, selectedPart, selectedTestType, searchQuery]);
 
   const { data, isLoading, isError, error } = usePracticesBySection('LISTENING', queryParams);
 
@@ -101,11 +110,17 @@ export default function ListeningPracticePage() {
   const totalPages = data?.pagination?.totalPages ?? 1;
   const availableFilters = data?.availableFilters;
 
-  const handleFilterChange = useCallback((type: 'difficulty' | 'part', value: DifficultyLevel | number | null) => {
+  const handleFilterChange = useCallback((type: 'difficulty' | 'part' | 'testType', value: DifficultyLevel | number | TestType | null) => {
     if (type === 'difficulty') {
       setSelectedDifficulty(value as DifficultyLevel | null);
-    } else {
+    } else if (type === 'part') {
       setSelectedPart(value as number | null);
+      // Clear full test filter when selecting a specific part
+      if (value !== null) setSelectedTestType(null);
+    } else if (type === 'testType') {
+      setSelectedTestType(value as TestType | null);
+      // Clear part filter when selecting full test
+      if (value === 'FULL_TEST') setSelectedPart(null);
     }
     setPage(1);
   }, []);
@@ -113,11 +128,12 @@ export default function ListeningPracticePage() {
   const clearFilters = useCallback(() => {
     setSelectedDifficulty(null);
     setSelectedPart(null);
+    setSelectedTestType(null);
     setSearchQuery('');
     setPage(1);
   }, []);
 
-  const hasActiveFilters = selectedDifficulty || selectedPart || searchQuery;
+  const hasActiveFilters = selectedDifficulty || selectedPart || selectedTestType || searchQuery;
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -210,8 +226,37 @@ export default function ListeningPracticePage() {
               </div>
             )}
 
-            {/* Part Filter */}
-            {availableFilters?.partNumbers && availableFilters.partNumbers.length > 0 && (
+            {/* Test Type Filter */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-neutral-500 dark:text-neutral-400">Type:</span>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => handleFilterChange('testType', selectedTestType === 'FULL_TEST' ? null : 'FULL_TEST')}
+                  className={cn(
+                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                    selectedTestType === 'FULL_TEST'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                  )}
+                >
+                  Full Test
+                </button>
+                <button
+                  onClick={() => handleFilterChange('testType', selectedTestType === 'SECTION_PRACTICE' ? null : 'SECTION_PRACTICE')}
+                  className={cn(
+                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                    selectedTestType === 'SECTION_PRACTICE'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                  )}
+                >
+                  Section
+                </button>
+              </div>
+            </div>
+
+            {/* Part Filter - Only show when not filtering by Full Test */}
+            {selectedTestType !== 'FULL_TEST' && availableFilters?.partNumbers && availableFilters.partNumbers.length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-neutral-500 dark:text-neutral-400">Part:</span>
                 <div className="flex gap-1">
@@ -316,6 +361,7 @@ export default function ListeningPracticePage() {
               {practices.map((practice, index) => {
                 const diffConfig = difficultyConfig[practice.difficulty] || difficultyConfig.MEDIUM;
                 const isCompleted = practice.attemptsCount > 0;
+                const isFullTest = practice.testType === 'FULL_TEST';
 
                 return (
                   <motion.div
@@ -325,90 +371,116 @@ export default function ListeningPracticePage() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Link href={`/practice/listening/${practice.uuid}`}>
-                      <div className={cn(
-                        'bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800',
-                        'hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg',
-                        'transition-all duration-200 cursor-pointer group'
-                      )}>
-                        <div className="p-6">
-                          <div className="flex items-start gap-4">
-                            {/* Part Number/Icon */}
-                            <div className={cn(
-                              'w-16 h-16 rounded-xl flex flex-col items-center justify-center shrink-0',
-                              isCompleted
+                    <div className={cn(
+                      'bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800',
+                      'hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg',
+                      'transition-all duration-200 group'
+                    )}>
+                      <div className="p-6">
+                        <div className="flex items-start gap-4">
+                          {/* Part Number/Icon */}
+                          <div className={cn(
+                            'w-16 h-16 rounded-xl flex flex-col items-center justify-center shrink-0',
+                            isFullTest
+                              ? 'bg-primary-100 dark:bg-primary-900/30'
+                              : isCompleted
                                 ? 'bg-blue-100 dark:bg-blue-900/30'
                                 : 'bg-neutral-100 dark:bg-neutral-800'
-                            )}>
-                              {isCompleted ? (
-                                <CheckIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                              ) : (
-                                <>
-                                  <span className="text-xs text-neutral-500 dark:text-neutral-400">Part</span>
-                                  <span className="text-xl font-bold text-neutral-900 dark:text-white">
-                                    {practice.listeningPartNumber || '—'}
-                                  </span>
-                                </>
-                              )}
-                            </div>
+                          )}>
+                            {isFullTest ? (
+                              <span className="text-sm font-bold text-primary-600 dark:text-primary-400">FT</span>
+                            ) : isCompleted ? (
+                              <CheckIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            ) : (
+                              <>
+                                <span className="text-xs text-neutral-500 dark:text-neutral-400">Part</span>
+                                <span className="text-xl font-bold text-neutral-900 dark:text-white">
+                                  {practice.listeningPartNumber || '—'}
+                                </span>
+                              </>
+                            )}
+                          </div>
 
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1 min-w-0">
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
                                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                                     {practice.title}
                                   </h3>
-                                  {practice.description && (
-                                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-1">
-                                      {practice.description}
-                                    </p>
+                                  {/* Full Test Badge */}
+                                  {isFullTest && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 shrink-0">
+                                      Full Test
+                                    </span>
                                   )}
                                 </div>
-
-                                {/* Difficulty Badge */}
-                                <span className={cn(
-                                  'px-3 py-1 rounded-full text-xs font-medium shrink-0',
-                                  diffConfig.color
-                                )}>
-                                  {diffConfig.label}
-                                </span>
-                              </div>
-
-                              {/* Meta Info */}
-                              <div className="flex items-center gap-6 mt-4">
-                                <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                  <ClockIcon className="w-4 h-4" />
-                                  <span>{practice.durationMinutes} mins</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                  <QuestionsIcon className="w-4 h-4" />
-                                  <span>{practice.totalQuestions || 10} questions</span>
-                                </div>
-                                {practice.attemptsCount > 0 && (
-                                  <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                                    <TrophyIcon className="w-4 h-4" />
-                                    <span>Best: {practice.bestScore}%</span>
-                                  </div>
+                                {practice.description && (
+                                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-1">
+                                    {practice.description}
+                                  </p>
                                 )}
                               </div>
+
+                              {/* Difficulty Badge */}
+                              <span className={cn(
+                                'px-3 py-1 rounded-full text-xs font-medium shrink-0',
+                                diffConfig.color
+                              )}>
+                                {diffConfig.label}
+                              </span>
                             </div>
 
-                            {/* Action Button */}
-                            <div className="shrink-0">
-                              <div className={cn(
-                                'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
-                                isCompleted
-                                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                  : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-600 group-hover:text-white'
-                              )}>
-                                <PlayIcon className="w-5 h-5" />
+                            {/* Meta Info */}
+                            <div className="flex items-center gap-6 mt-4">
+                              <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                <ClockIcon className="w-4 h-4" />
+                                <span>{practice.durationMinutes} mins</span>
                               </div>
+                              <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                <QuestionsIcon className="w-4 h-4" />
+                                <span>{practice.totalQuestions || 10} questions</span>
+                              </div>
+                              {practice.attemptsCount > 0 && (
+                                <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                                  <TrophyIcon className="w-4 h-4" />
+                                  <span>Best: {practice.bestScore}%</span>
+                                </div>
+                              )}
                             </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="shrink-0 flex items-center gap-2">
+                            {/* Last Result Button - Only show if completed */}
+                            {isCompleted && (
+                              <Link
+                                href={`/practice/${practice.uuid}/results`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-10 h-10 rounded-lg flex items-center justify-center text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                                title="View last result"
+                              >
+                                <ChartIcon className="w-5 h-5" />
+                              </Link>
+                            )}
+                            {/* Start/Retry Button */}
+                            <Link
+                              href={`/practice/listening/${practice.uuid}`}
+                              className={cn(
+                                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                                isCompleted
+                                  ? 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                  : 'bg-primary-600 text-white hover:bg-primary-700'
+                              )}
+                            >
+                              {isCompleted ? 'Retry' : 'Start'}
+                              <PlayIcon className="w-4 h-4" />
+                            </Link>
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   </motion.div>
                 );
               })}

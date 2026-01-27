@@ -368,7 +368,7 @@ export default function HomePage() {
                   style={{ transform: "scale(0.8)" }}
                 />
 
-                <div className="relative h-full p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-all duration-500 shadow-sm dark:shadow-none">
+                <div className="relative h-full p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-all duration-500  dark:shadow-none">
                   {/* Icon */}
                   <div
                     className={cn(
@@ -459,7 +459,7 @@ export default function HomePage() {
 
                 {/* Content Card */}
                 <div className="flex-1 group">
-                  <div className="p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-all duration-300 shadow-sm dark:shadow-none">
+                  <div className="p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-all duration-300  dark:shadow-none">
                     <div className="flex items-start gap-5">
                       <div
                         className={cn(
@@ -520,7 +520,7 @@ export default function HomePage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="group flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:bg-neutral-50 dark:hover:bg-white/[0.06] hover:border-neutral-300 dark:hover:border-white/20 transition-all duration-300 shadow-sm dark:shadow-none"
+                    className="group flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:bg-neutral-50 dark:hover:bg-white/[0.06] hover:border-neutral-300 dark:hover:border-white/20 transition-all duration-300  dark:shadow-none"
                   >
                     <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary-100 dark:from-primary-500/20 to-accent-100 dark:to-accent-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                       <feature.icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
@@ -638,7 +638,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ scale: 1.02 }}
-                  className="group p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 transition-all duration-300 shadow-sm dark:shadow-none"
+                  className="group p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 transition-all duration-300  dark:shadow-none"
                 >
                   <div className="text-5xl md:text-6xl font-black gradient-text mb-3">{stat.value}</div>
                   <div className="text-neutral-900 dark:text-white text-lg font-semibold mb-1">{stat.label}</div>
