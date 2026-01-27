@@ -35,14 +35,8 @@ export default function LoginPage() {
                 return;
             }
 
-            // Redirect based on role
-            if (session.user.role === 'MANAGER') {
-                router.push('/manager');
-            } else if (session.user.role === 'TEACHER') {
-                router.push('/teacher');
-            } else {
-                router.push('/dashboard');
-            }
+            router.push('/dashboard');
+
         },
         onError: (error) => {
             setGeneralError(error.message || 'Invalid credentials. Please try again.');

@@ -132,14 +132,9 @@ export function ProtectedRoute({
         }
 
         if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-            // Redirect to appropriate dashboard based on role
-            if (user.role === 'MANAGER') {
-                router.push('/manager');
-            } else if (user.role === 'TEACHER') {
-                router.push('/teacher');
-            } else {
+
                 router.push('/dashboard');
-            }
+
         }
     }, [isLoading, isAuthenticated, user, router, requireVerified, requireOnboarding, allowedRoles]);
 

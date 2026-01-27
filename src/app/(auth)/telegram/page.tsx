@@ -32,10 +32,6 @@ export default function TelegramAuthPage() {
                     router.push('/verify-email');
                 } else if (!session.user.onboardingCompleted) {
                     router.push('/onboarding');
-                } else if (session.user.role === 'MANAGER') {
-                    router.push('/manager');
-                } else if (session.user.role === 'TEACHER') {
-                    router.push('/teacher');
                 } else {
                     router.push('/dashboard');
                 }
