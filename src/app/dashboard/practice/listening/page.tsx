@@ -454,9 +454,9 @@ export default function ListeningPracticePage() {
                           {/* Action Buttons */}
                           <div className="shrink-0 flex items-center gap-2">
                             {/* Last Result Button - Only show if completed */}
-                            {isCompleted && (
+                            {(practice.lastAttempt && isCompleted) && (
                               <Link
-                                href={`/practice/${practice.uuid}/results`}
+                                href={`/practice/${practice.lastAttempt}/results`}
                                 onClick={(e) => e.stopPropagation()}
                                 className="w-10 h-10 rounded-lg flex items-center justify-center text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                                 title="View last result"

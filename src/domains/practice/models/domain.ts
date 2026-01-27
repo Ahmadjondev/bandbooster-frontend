@@ -49,6 +49,7 @@ export interface PracticeListItem {
   readonly attemptsCount: number;
   readonly bestScore: number | null;
   readonly lastAttemptDate: Date | null;
+  readonly lastAttempt: string | null;
   readonly createdAt: Date;
   // Reading specific
   readonly readingPassageNumber?: number | null;

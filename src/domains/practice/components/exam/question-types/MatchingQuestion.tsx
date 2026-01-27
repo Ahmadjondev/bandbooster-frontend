@@ -118,11 +118,11 @@ const OptionsBox = memo(function OptionsBox({
         {getTitle()}
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {options.map((option) => {
+        {options.map((option, index) => {
           const isUsed = !allowDuplicates && usedValues.includes(option.value);
           return (
             <div
-              key={option.value}
+              key={`option-${option.value}-${index}`}
               className={cn(
                 'flex items-start gap-2 px-3 py-2 rounded',
                 'transition-colors',
@@ -244,8 +244,8 @@ const MatchingQuestionItem = memo(function MatchingQuestionItem({
             <option value="" className="text-neutral-400">
               Select an answer...
             </option>
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
+            {options.map((option, index) => (
+              <option key={`${question.id}-option-${option.value}-${index}`} value={option.value}>
                 {option.value}. {option.label}
               </option>
             ))}

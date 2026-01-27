@@ -1,41 +1,98 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useSyncExternalStore, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
+const SIDEBAR_COLLAPSED_KEY = 'dashboard-sidebar-collapsed';
+
+// Custom hook for localStorage-backed state with SSR safety
+function useLocalStorageState(key: string, defaultValue: boolean): [boolean, (value: boolean) => void] {
+  const getSnapshot = () => {
+    if (typeof window === 'undefined') return defaultValue;
+    const stored = localStorage.getItem(key);
+    return stored === null ? defaultValue : stored === 'true';
+  };
+
+  const getServerSnapshot = () => defaultValue;
+
+  const subscribe = (callback: () => void) => {
+    window.addEventListener('storage', callback);
+    return () => window.removeEventListener('storage', callback);
+  };
+
+  const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const setValue = useCallback((newValue: boolean) => {
+    localStorage.setItem(key, String(newValue));
+    // Trigger re-render by dispatching storage event
+    window.dispatchEvent(new StorageEvent('storage', { key }));
+  }, [key]);
+
+  return [value, setValue];
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string; isPremium?: boolean } | null>(null);
+interface UserData {
+  name: string;
+  email: string;
+  isPremium: boolean;
+}
 
-  // Load user from localStorage
+// Custom hook for loading user from localStorage - uses useState to avoid infinite loop
+function useUser(): UserData | null {
+  const [user, setUser] = useState<UserData | null>(null);
+
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const loadUser = () => {
+      const stored = localStorage.getItem('user');
+      if (!stored) {
+        setUser(null);
+        return;
+      }
       try {
-        const userData = JSON.parse(storedUser);
+        const userData = JSON.parse(stored);
         setUser({
           name: userData.first_name || userData.username || 'Student',
           email: userData.email || 'student@example.com',
           isPremium: userData.is_premium || false,
         });
       } catch {
-        // Use default user
+        setUser(null);
       }
-    }
+    };
+
+    loadUser();
+
+    // Listen for storage changes
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'user') {
+        loadUser();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, []);
+  return user;
+}
+
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+}
+
+export function DashboardLayout({ children }: DashboardLayoutProps) {
+  // Use localStorage-backed state for sidebar
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useLocalStorageState(SIDEBAR_COLLAPSED_KEY, false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const user = useUser();
+
+  // Persist sidebar state to localStorage
+  const handleSidebarToggle = useCallback(() => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  }, [isSidebarCollapsed, setIsSidebarCollapsed]);
 
   // Handle responsive behavior
   useEffect(() => {
@@ -43,7 +100,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       if (window.innerWidth >= 1024) {
         setIsMobileMenuOpen(false);
       }
-      if (window.innerWidth < 1280) {
+      // Only auto-collapse on small screens if user hasn't set a preference
+      const storedPreference = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+      if (window.innerWidth < 1280 && storedPreference === null) {
         setIsSidebarCollapsed(true);
       }
     };
@@ -51,7 +110,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [setIsSidebarCollapsed]);
 
   // Update CSS variable for sidebar width
   useEffect(() => {
@@ -65,7 +124,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="hidden lg:block">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onToggle={handleSidebarToggle}
         />
       </div>
 

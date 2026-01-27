@@ -2,13 +2,18 @@
  * Summary Completion (SUC) Component
  * CD-IELTS authentic summary completion questions
  * SUC: From passage words | SUC_WITH_WORDLIST: From word bank
+ * 
+ * When question_data has word_list:
+ * - Uses dropdown selector instead of text input
+ * - No free-text input allowed
+ * - Dropdown contains only items from word_list
  */
 
 'use client';
 
 import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { BlankInput } from './shared';
+import { BlankInput, WordListDropdown } from './shared';
 import type { AnswerState, WordListItem, ExamMode } from '@/domains/practice/models/question-types';
 
 // ============= Types =============
@@ -99,6 +104,9 @@ export const SUCQuestion = memo(function SUCQuestion({
   hasWordList = false,
   highlightedQuestionId = null,
 }: SUCProps) {
+  // Determine if we should use dropdown (when word_list is present and has items)
+  const useDropdown = hasWordList && summaryData.wordList && summaryData.wordList.length > 0;
+
   // Track used letters from word list
   const usedLetters = useMemo(() => {
     return Object.values(userAnswers)
@@ -118,7 +126,7 @@ export const SUCQuestion = memo(function SUCQuestion({
     return map;
   }, [questions, userAnswers]);
 
-  // Parse summary text and replace <input> with actual inputs
+  // Parse summary text and replace <input> with actual inputs or dropdowns
   const renderSummaryText = useCallback(() => {
     const text = summaryData.text;
     const parts: React.ReactNode[] = [];
@@ -141,25 +149,40 @@ export const SUCQuestion = memo(function SUCQuestion({
         );
       }
 
-      // Add input
+      // Add input or dropdown based on whether word_list is present
       const question = sortedQuestions[inputCounter];
       if (question) {
         const data = questionMap.get(question.order);
-        parts.push(
-          <BlankInput
-            key={`input-${question.id}`}
-            value={data?.answer || ''}
-            onChange={(v) => onAnswer(question.id, v)}
-            onFocus={() => onFocus?.(question.id)}
-            disabled={disabled}
-            fontSize={fontSize}
-            questionNumber={question.order}
-            variant={hasWordList ? 'compact' : 'inline'}
-            uppercase={true}
-            maxLength={hasWordList ? 1 : undefined}
-            placeholder={hasWordList ? 'A' : 'Answer'}
-          />
-        );
+
+        // If word_list is present, use dropdown instead of text input
+        if (useDropdown && summaryData.wordList) {
+          parts.push(
+            <WordListDropdown
+              key={`dropdown-${question.id}`}
+              value={data?.answer || ''}
+              wordList={summaryData.wordList}
+              onChange={(v) => onAnswer(question.id, v)}
+              onFocus={() => onFocus?.(question.id)}
+              disabled={disabled}
+              fontSize={fontSize}
+              questionNumber={question.order}
+            />
+          );
+        } else {
+          // No word_list - use regular text input
+          parts.push(
+            <BlankInput
+              key={`input-${question.id}`}
+              value={data?.answer || ''}
+              onChange={(v) => onAnswer(question.id, v)}
+              onFocus={() => onFocus?.(question.id)}
+              disabled={disabled}
+              fontSize={fontSize}
+              questionNumber={question.order}
+              variant="inline"
+            />
+          );
+        }
       }
 
       inputCounter++;
@@ -175,7 +198,7 @@ export const SUCQuestion = memo(function SUCQuestion({
     }
 
     return parts;
-  }, [summaryData.text, questions, questionMap, onAnswer, onFocus, disabled, fontSize, hasWordList]);
+  }, [summaryData.text, summaryData.wordList, questions, questionMap, onAnswer, onFocus, disabled, fontSize, useDropdown]);
 
   return (
     <div className="suc-question-group">

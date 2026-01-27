@@ -69,7 +69,7 @@ export const BlankInput = memo(forwardRef<HTMLInputElement, BlankInputProps>(
             disabled = false,
             fontSize = 'text-base',
             questionNumber,
-            placeholder = '',
+            placeholder = '...',
             // variant - reserved for future layout variations
             uppercase = false,
             maxLength,

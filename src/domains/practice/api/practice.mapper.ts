@@ -95,6 +95,7 @@ export function mapPracticeListItemDTOToDomain(dto: PracticeListItemDTO): Practi
     attemptsCount: dto.attempts_count,
     bestScore: dto.best_score,
     lastAttemptDate: dto.last_attempt_date ? new Date(dto.last_attempt_date) : null,
+    lastAttempt: dto.last_attempt,
     createdAt: new Date(dto.created_at),
     readingPassageNumber: dto.reading_passage_number,
     listeningPartNumber: dto.listening_part_number,

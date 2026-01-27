@@ -1,29 +1,29 @@
 /**
- * IELTS Listening Practice Page
- * Pixel-perfect implementation matching official IELTS test interface
- * Features: Timer, Theme Toggle, Question Highlighting, API Submission, Result Page
- * Keyboard navigation support with Tab/Shift+Tab
+ * IELTS Reading Practice Page
+ * Split-panel layout: Left panel for passage, Right panel for questions
+ * No audio controls - reading specific behavior
+ * Features: Timer, Theme Toggle, Question Highlighting, API Submission
  */
 
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { PlayDialog } from '@/domains/practice/components/exam/PlayDialog';
 import { IELTSHeader } from '@/domains/practice/components/exam/IELTSHeader';
-import { BottomNav, type SectionInfo as PartInfo, type QuestionInfo } from '@/domains/practice/components/exam/BottomNav';
+import { ReadingPassage } from '@/domains/practice/components/exam/ReadingPassage';
+import { ReadingSplitter } from '@/domains/practice/components/exam/ReadingSplitter';
+import { BottomNav, type SectionInfo as ReadingPassageInfo, type QuestionInfo } from '@/domains/practice/components/exam/BottomNav';
 import { NavigationControls } from '@/domains/practice/components/exam/NavigationControls';
 import { QuestionTypeFactory, type APITestHead } from '@/domains/practice/components/exam/question-types';
 import { cn } from '@/lib/utils';
 
 // Types matching API response
-interface APIListeningContent {
+interface APIReadingContent {
     id: number;
-    section_number: number;
-    part_number: number;
+    passage_number: number;
     title: string;
-    description: string;
-    audio_url: string;
+    content: string;
+    word_count?: number;
     test_heads: APITestHead[];
     total_questions: number;
 }
@@ -42,7 +42,7 @@ interface APIPracticeDetail {
     is_premium: boolean;
     is_multi_content: boolean;
     content_count: number;
-    contents: APIListeningContent[];
+    contents: APIReadingContent[];
     user_attempts: unknown[];
     created_at: string;
 }
@@ -100,7 +100,7 @@ function ErrorScreen({ error, onRetry }: { error: string; onRetry?: () => void }
 // Submitting overlay
 function SubmittingOverlay() {
     return (
-        <div className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center">
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl text-center">
                 <div className="w-10 h-10 border-4 border-gray-200 dark:border-gray-700 border-t-primary-500 rounded-full animate-spin mx-auto mb-3" />
                 <p className="text-gray-700 dark:text-gray-300 font-medium">Submitting answers...</p>
@@ -112,29 +112,30 @@ function SubmittingOverlay() {
 // Highlight duration in ms
 const HIGHLIGHT_DURATION = 1500;
 
-export default function ListeningPracticePage() {
+export default function ReadingPracticePage() {
     const params = useParams();
     const router = useRouter();
     const practiceUuid = params.uuid as string;
     const questionsContainerRef = useRef<HTMLDivElement>(null);
-    const audioRef = useRef<HTMLAudioElement>(null);
+    const passageContainerRef = useRef<HTMLDivElement>(null);
+    const mainContainerRef = useRef<HTMLDivElement>(null);
 
     // State
-    const [showPlayDialog, setShowPlayDialog] = useState(true);
-    const [hasStarted, setHasStarted] = useState(true);
     const [rawData, setRawData] = useState<APIPracticeDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activePart, setActivePart] = useState(1);
+    const [activePassage, setActivePassage] = useState(1);
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
-    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
     // Enhanced feature state
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [highlightedQuestionId, setHighlightedQuestionId] = useState<number | null>(null);
     const [startedAt, setStartedAt] = useState<Date | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Splitter state - left panel width as percentage
+    const [leftPanelWidthPercent, setLeftPanelWidthPercent] = useState(50);
 
     // Initialize dark mode from localStorage or system preference
     useEffect(() => {
@@ -183,19 +184,19 @@ export default function ListeningPracticePage() {
             });
     }, [practiceUuid]);
 
-    // Sort contents by part number
+    // Sort contents by passage number
     const sortedContents = useMemo(() => {
         if (!rawData?.contents) return [];
-        return [...rawData.contents].sort((a, b) => a.part_number - b.part_number);
+        return [...rawData.contents].sort((a, b) => a.passage_number - b.passage_number);
     }, [rawData]);
 
     // Get active content
     const activeContent = useMemo(() => {
-        return sortedContents.find(c => c.part_number === activePart) || sortedContents[0];
-    }, [sortedContents, activePart]);
+        return sortedContents.find(c => c.passage_number === activePassage) || sortedContents[0];
+    }, [sortedContents, activePassage]);
 
-    // Build parts info for bottom nav
-    const partsInfo: PartInfo[] = useMemo(() => {
+    // Build passages info for bottom nav
+    const passagesInfo: ReadingPassageInfo[] = useMemo(() => {
         return sortedContents.map(content => {
             const questions: QuestionInfo[] = [];
             content.test_heads.forEach(head => {
@@ -206,17 +207,17 @@ export default function ListeningPracticePage() {
                     questions.push({ id: q.id, order: q.order, isAnswered });
                 });
             });
-            return { sectionNumber: content.part_number, questions };
+            return { sectionNumber: content.passage_number, title: content.title, questions };
         });
     }, [sortedContents, userAnswers]);
 
-    // Flatten all questions across all parts for prev/next navigation
+    // Flatten all questions across all passages for prev/next navigation
     const allQuestions = useMemo(() => {
-        const questions: { id: number; order: number; partNumber: number }[] = [];
+        const questions: { id: number; order: number; passageNumber: number }[] = [];
         sortedContents.forEach(content => {
             content.test_heads.forEach(head => {
                 head.questions.forEach(q => {
-                    questions.push({ id: q.id, order: q.order, partNumber: content.part_number });
+                    questions.push({ id: q.id, order: q.order, passageNumber: content.passage_number });
                 });
             });
         });
@@ -225,24 +226,27 @@ export default function ListeningPracticePage() {
 
     // Current question index in allQuestions array
     const currentQuestionIndex = useMemo(() => {
-        const activePartQuestions = partsInfo.find(p => p.sectionNumber === activePart)?.questions || [];
-        if (activePartQuestions.length === 0) return 0;
-        const currentQuestionId = activePartQuestions[activeQuestionIndex]?.id;
+        const activePassageQuestions = passagesInfo.find(p => p.sectionNumber === activePassage)?.questions || [];
+        if (activePassageQuestions.length === 0) return 0;
+        const currentQuestionId = activePassageQuestions[activeQuestionIndex]?.id;
         return allQuestions.findIndex(q => q.id === currentQuestionId);
-    }, [partsInfo, activePart, activeQuestionIndex, allQuestions]);
+    }, [passagesInfo, activePassage, activeQuestionIndex, allQuestions]);
 
     // Get current active question ID
     const activeQuestionId = useMemo(() => {
-        const activePartQuestions = partsInfo.find(p => p.sectionNumber === activePart)?.questions || [];
-        return activePartQuestions[activeQuestionIndex]?.id ?? null;
-    }, [partsInfo, activePart, activeQuestionIndex]);
+        const activePassageQuestions = passagesInfo.find(p => p.sectionNumber === activePassage)?.questions || [];
+        return activePassageQuestions[activeQuestionIndex]?.id ?? null;
+    }, [passagesInfo, activePassage, activeQuestionIndex]);
 
-    // Auto-scroll to top when part changes
+    // Auto-scroll to top when passage changes
     useEffect(() => {
         if (questionsContainerRef.current) {
             questionsContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    }, [activePart]);
+        if (passageContainerRef.current) {
+            passageContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [activePassage]);
 
     // Highlight a question with auto-fade
     const highlightQuestion = useCallback((questionId: number) => {
@@ -259,55 +263,44 @@ export default function ListeningPracticePage() {
     }, []);
 
     // Handlers
-    const handleStart = useCallback(() => {
-        setShowPlayDialog(false);
-        setHasStarted(true);
-        // Start audio playback after dialog closes
-        setTimeout(() => {
-            if (audioRef.current) {
-                audioRef.current.play().then(() => setIsAudioPlaying(true)).catch(console.error);
-            }
-        }, 300);
-    }, []);
-
     const handleBack = useCallback(() => {
-        router.push('/dashboard/practice/listening');
+        router.push('/dashboard/practice/reading');
     }, [router]);
 
     const handleAnswer = useCallback((questionId: number, answer: string | string[]) => {
         setUserAnswers(prev => ({ ...prev, [questionId]: answer }));
     }, []);
 
-    const handlePartChange = useCallback((partNumber: number) => {
-        setActivePart(partNumber);
-        setActiveQuestionIndex(0); // Reset to first question of the part
+    const handlePassageChange = useCallback((passageNumber: number) => {
+        setActivePassage(passageNumber);
+        setActiveQuestionIndex(0); // Reset to first question of the passage
     }, []);
 
     const handleQuestionClick = useCallback((questionId: number) => {
-        // Find the question's index in the current part
-        const activePartQuestions = partsInfo.find(p => p.sectionNumber === activePart)?.questions || [];
-        const questionIdx = activePartQuestions.findIndex(q => q.id === questionId);
+        // Find the question's index in the current passage
+        const activePassageQuestions = passagesInfo.find(p => p.sectionNumber === activePassage)?.questions || [];
+        const questionIdx = activePassageQuestions.findIndex(q => q.id === questionId);
         if (questionIdx >= 0) {
             setActiveQuestionIndex(questionIdx);
         }
         // Scroll and highlight
         scrollToQuestion(questionId);
         highlightQuestion(questionId);
-    }, [partsInfo, activePart, scrollToQuestion, highlightQuestion]);
+    }, [passagesInfo, activePassage, scrollToQuestion, highlightQuestion]);
 
     const handlePrev = useCallback(() => {
         if (currentQuestionIndex <= 0) return;
 
         const prevQuestion = allQuestions[currentQuestionIndex - 1];
         if (prevQuestion) {
-            // If different part, switch parts and set correct question index
-            if (prevQuestion.partNumber !== activePart) {
-                setActivePart(prevQuestion.partNumber);
-                const prevPartQuestions = partsInfo.find(p => p.sectionNumber === prevQuestion.partNumber)?.questions || [];
-                const questionIdx = prevPartQuestions.findIndex(q => q.id === prevQuestion.id);
+            // If different passage, switch passages and set correct question index
+            if (prevQuestion.passageNumber !== activePassage) {
+                setActivePassage(prevQuestion.passageNumber);
+                const prevPassageQuestions = passagesInfo.find(p => p.sectionNumber === prevQuestion.passageNumber)?.questions || [];
+                const questionIdx = prevPassageQuestions.findIndex(q => q.id === prevQuestion.id);
                 setActiveQuestionIndex(questionIdx >= 0 ? questionIdx : 0);
             } else {
-                // Same part, just decrement index
+                // Same passage, just decrement index
                 setActiveQuestionIndex(prev => Math.max(0, prev - 1));
             }
             // Scroll to question and highlight
@@ -316,21 +309,21 @@ export default function ListeningPracticePage() {
                 highlightQuestion(prevQuestion.id);
             }, 100);
         }
-    }, [currentQuestionIndex, allQuestions, activePart, partsInfo, scrollToQuestion, highlightQuestion]);
+    }, [currentQuestionIndex, allQuestions, activePassage, passagesInfo, scrollToQuestion, highlightQuestion]);
 
     const handleNext = useCallback(() => {
         if (currentQuestionIndex >= allQuestions.length - 1) return;
 
         const nextQuestion = allQuestions[currentQuestionIndex + 1];
         if (nextQuestion) {
-            // If different part, switch parts and set correct question index
-            if (nextQuestion.partNumber !== activePart) {
-                setActivePart(nextQuestion.partNumber);
-                const nextPartQuestions = partsInfo.find(p => p.sectionNumber === nextQuestion.partNumber)?.questions || [];
-                const questionIdx = nextPartQuestions.findIndex(q => q.id === nextQuestion.id);
+            // If different passage, switch passages and set correct question index
+            if (nextQuestion.passageNumber !== activePassage) {
+                setActivePassage(nextQuestion.passageNumber);
+                const nextPassageQuestions = passagesInfo.find(p => p.sectionNumber === nextQuestion.passageNumber)?.questions || [];
+                const questionIdx = nextPassageQuestions.findIndex(q => q.id === nextQuestion.id);
                 setActiveQuestionIndex(questionIdx >= 0 ? questionIdx : 0);
             } else {
-                // Same part, just increment index
+                // Same passage, just increment index
                 setActiveQuestionIndex(prev => prev + 1);
             }
             // Scroll to question and highlight
@@ -339,12 +332,10 @@ export default function ListeningPracticePage() {
                 highlightQuestion(nextQuestion.id);
             }, 100);
         }
-    }, [currentQuestionIndex, allQuestions, activePart, partsInfo, scrollToQuestion, highlightQuestion]);
+    }, [currentQuestionIndex, allQuestions, activePassage, passagesInfo, scrollToQuestion, highlightQuestion]);
 
     // Keyboard navigation handler
     useEffect(() => {
-        if (!hasStarted || showPlayDialog) return;
-
         const handleKeyDown = (e: KeyboardEvent) => {
             // Only handle Tab navigation when not in an input/textarea
             const activeElement = document.activeElement;
@@ -364,7 +355,7 @@ export default function ListeningPracticePage() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [hasStarted, showPlayDialog, handlePrev, handleNext]);
+    }, [handlePrev, handleNext]);
 
     // Submit answers to API
     const submitAnswers = useCallback(async () => {
@@ -441,23 +432,6 @@ export default function ListeningPracticePage() {
         setIsDarkMode(isDark);
     }, []);
 
-    const handleAudioEnded = useCallback(() => {
-        setIsAudioPlaying(false);
-        // Auto-advance to next part
-        const nextPart = sortedContents.find(c => c.part_number === activePart + 1);
-        if (nextPart) {
-            setTimeout(() => {
-                setActivePart(nextPart.part_number);
-                // Play next part's audio
-                setTimeout(() => {
-                    if (audioRef.current) {
-                        audioRef.current.play().then(() => setIsAudioPlaying(true)).catch(console.error);
-                    }
-                }, 500);
-            }, 1000);
-        }
-    }, [activePart, sortedContents]);
-
     // Loading state
     if (isLoading) {
         return <LoadingScreen />;
@@ -467,7 +441,7 @@ export default function ListeningPracticePage() {
     if (error || !rawData?.contents?.length) {
         return (
             <ErrorScreen
-                error={error || 'No listening content available'}
+                error={error || 'No reading content available'}
                 onRetry={() => window.location.reload()}
             />
         );
@@ -496,80 +470,101 @@ export default function ListeningPracticePage() {
                 }
             `}</style>
 
-            {/* Play Dialog Overlay */}
-            <PlayDialog isOpen={showPlayDialog} onStart={handleStart} />
+            {/* Header - Fixed at top with timer, theme toggle, and submit button */}
+            <IELTSHeader
+                onBack={handleBack}
+                timerMinutes={rawData.duration || 60}
+                onTimeUp={handleTimeUp}
+                onTimerStart={handleTimerStart}
+                isDarkMode={isDarkMode}
+                onThemeToggle={handleThemeToggle}
+                showTimer={true}
+                showThemeToggle={true}
+                onSubmit={handleSubmit}
+                showSubmit={true}
+            />
 
-            {/* Main Content (visible after starting) */}
-            {hasStarted && (
-                <>
-                    {/* Header - Fixed at top with timer, theme toggle, and submit button */}
-                    <IELTSHeader
-                        onBack={handleBack}
-                        timerMinutes={rawData.duration || 40}
-                        onTimeUp={handleTimeUp}
-                        onTimerStart={handleTimerStart}
-                        isDarkMode={isDarkMode}
-                        onThemeToggle={handleThemeToggle}
-                        showTimer={true}
-                        showThemeToggle={true}
-                        onSubmit={handleSubmit}
-                        showSubmit={true}
+            {/* Main Content - Split Panel Layout with Independent Scrolling */}
+            {/* Height: 100vh - header(56px) - bottom nav(56px) = calc(100vh - 112px) */}
+            <div
+                ref={mainContainerRef}
+                className="fixed top-14 bottom-14 left-0 right-0 flex overflow-hidden"
+            >
+                {/* Left Panel - Reading Passage (Independent Scroll) */}
+                <div
+                    className="h-full overflow-hidden flex flex-col"
+                    style={{ width: `${leftPanelWidthPercent}%` }}
+                >
+                    <ReadingPassage
+                        ref={passageContainerRef}
+                        title={activeContent?.title || ''}
+                        content={activeContent?.content || ''}
+                        passageNumber={activeContent?.passage_number}
+                        wordCount={activeContent?.word_count}
+                        className="h-full overflow-y-auto"
                     />
+                </div>
 
-                    {/* Hidden Audio Element */}
-                    <audio
-                        ref={audioRef}
-                        src={activeContent?.audio_url}
-                        onEnded={handleAudioEnded}
-                        preload="auto"
-                    />
+                {/* Vertical Reading Splitter - Drag to resize */}
+                <ReadingSplitter
+                    leftWidthPercent={leftPanelWidthPercent}
+                    onWidthChange={setLeftPanelWidthPercent}
+                    containerRef={mainContainerRef}
+                />
 
-                    {/* Main scrollable content area - accounts for fixed header (h-14 = 56px), nav controls (h-12 = 48px), and bottom nav (h-14 = 56px) */}
-                    <div className="pt-14 pb-26 flex-1 overflow-y-auto" ref={questionsContainerRef}>
-                        {/* Part Title Bar */}
-                        <div className="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 px-6 py-3 m-4 rounded">
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white">Part {activeContent.part_number}</h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{activeContent.description || `Listen and answer questions.`}</p>
-                        </div>
-
-                        {/* Questions Content - increased spacing between question groups */}
-                        <div className="max-w-full mx-auto px-6 py-6 space-y-12">
-                            {activeContent.test_heads.map((group) => (
-                                <div
-                                    key={group.id}
-                                    className="question-group-wrapper"
-                                >
-                                    <QuestionTypeFactory
-                                        group={group}
-                                        userAnswers={userAnswers}
-                                        onAnswer={handleAnswer}
-                                        mode="listening"
-                                        highlightedQuestionId={highlightedQuestionId}
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                {/* Right Panel - Questions (Independent Scroll) */}
+                <div
+                    ref={questionsContainerRef}
+                    className="h-full overflow-y-auto bg-gray-50 dark:bg-slate-800/50"
+                    style={{ width: `${100 - leftPanelWidthPercent}%` }}
+                >
+                    {/* Questions Header */}
+                    <div className="sticky top-0 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 z-10">
+                        <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                            Questions
+                        </h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Read the passage and answer the questions below.
+                        </p>
                     </div>
 
-                    {/* Navigation Controls - positioned above bottom nav, right-aligned */}
-                    <NavigationControls
-                        onPrev={handlePrev}
-                        onNext={handleNext}
-                        canGoPrev={currentQuestionIndex > 0}
-                        canGoNext={currentQuestionIndex < allQuestions.length - 1}
-                    />
+                    {/* Questions Content */}
+                    <div className="px-6 py-6 space-y-10">
+                        {activeContent?.test_heads.map((group) => (
+                            <div
+                                key={group.id}
+                                className="question-group-wrapper"
+                            >
+                                <QuestionTypeFactory
+                                    group={group}
+                                    userAnswers={userAnswers}
+                                    onAnswer={handleAnswer}
+                                    mode="reading"
+                                    highlightedQuestionId={highlightedQuestionId}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
 
-                    {/* Bottom Navigation */}
-                    <BottomNav
-                        sections={partsInfo}
-                        activeSection={activePart}
-                        activeQuestionId={activeQuestionId}
-                        onSectionChange={handlePartChange}
-                        onQuestionClick={handleQuestionClick}
-                        mode="listening"
-                    />
-                </>
-            )}
+            {/* Navigation Controls - positioned above bottom nav, right-aligned */}
+            <NavigationControls
+                onPrev={handlePrev}
+                onNext={handleNext}
+                canGoPrev={currentQuestionIndex > 0}
+                canGoNext={currentQuestionIndex < allQuestions.length - 1}
+            />
+
+            {/* Bottom Navigation */}
+            <BottomNav
+                sections={passagesInfo}
+                activeSection={activePassage}
+                activeQuestionId={activeQuestionId}
+                onSectionChange={handlePassageChange}
+                onQuestionClick={handleQuestionClick}
+                mode="reading"
+            />
         </div>
     );
 }

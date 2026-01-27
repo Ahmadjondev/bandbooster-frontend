@@ -74,54 +74,87 @@ const QuestionBadge = memo(function QuestionBadge({ order, isAnswered }: Questio
   );
 });
 
-interface OptionButtonProps {
+interface RadioOptionProps {
   option: { key: string; label: string; color: 'green' | 'red' | 'gray' };
   isSelected: boolean;
   onSelect: () => void;
   disabled?: boolean;
+  questionId: number;
+  name: string;
 }
 
-const OptionButton = memo(function OptionButton({
+const RadioOption = memo(function RadioOption({
   option,
   isSelected,
   onSelect,
   disabled,
-}: OptionButtonProps) {
-  const getColorClasses = () => {
-    if (!isSelected) {
-      return 'border-neutral-300 dark:border-neutral-600 bg-white dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-slate-700/50';
-    }
+  questionId,
+  name,
+}: RadioOptionProps) {
+  const inputId = `tfng-${questionId}-${option.key}`;
 
+  const getSelectedColorClasses = () => {
     switch (option.color) {
       case 'green':
-        return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300';
+        return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20';
       case 'red':
-        return 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300';
+        return 'border-red-500 bg-red-50 dark:bg-red-900/20';
       case 'gray':
-        return 'border-neutral-500 bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300';
+        return 'border-neutral-500 bg-neutral-100 dark:bg-neutral-700';
       default:
-        return 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300';
+        return 'border-primary-500 bg-primary-50 dark:bg-primary-900/20';
+    }
+  };
+
+  const getLabelColorClasses = () => {
+    if (!isSelected) {
+      return 'text-neutral-600 dark:text-neutral-400';
+    }
+    switch (option.color) {
+      case 'green':
+        return 'text-emerald-700 dark:text-emerald-300';
+      case 'red':
+        return 'text-red-700 dark:text-red-300';
+      case 'gray':
+        return 'text-neutral-700 dark:text-neutral-300';
+      default:
+        return 'text-primary-700 dark:text-primary-300';
     }
   };
 
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={disabled}
+    <label
+      htmlFor={inputId}
       className={cn(
-        'px-4 py-2.5',
-        'text-sm font-semibold',
-        'border-2 rounded',
+        'flex items-center gap-2.5 px-4 py-2.5',
+        'border-2 rounded cursor-pointer',
         'transition-all duration-150',
-        'cursor-pointer',
-        'focus:outline-none focus:ring-2 focus:ring-primary-500/30',
-        getColorClasses(),
+        'hover:border-neutral-400 dark:hover:border-neutral-500',
+        isSelected
+          ? getSelectedColorClasses()
+          : 'border-neutral-300 dark:border-neutral-600 bg-white dark:bg-slate-800',
         disabled && 'opacity-60 cursor-not-allowed'
       )}
     >
-      {option.label}
-    </button>
+      <input
+        type="radio"
+        id={inputId}
+        name={name}
+        value={option.key}
+        checked={isSelected}
+        onChange={() => !disabled && onSelect()}
+        disabled={disabled}
+        className={cn(
+          'w-4 h-4',
+          'accent-primary-500',
+          'cursor-pointer',
+          disabled && 'cursor-not-allowed'
+        )}
+      />
+      <span className={cn('text-sm font-semibold', getLabelColorClasses())}>
+        {option.label}
+      </span>
+    </label>
   );
 });
 
@@ -171,15 +204,17 @@ const TFNGQuestionItem = memo(function TFNGQuestionItem({
         />
       </div>
 
-      {/* Options */}
-      <div className="ml-10 flex flex-wrap gap-3">
+      {/* Options - Radio buttons with one selectable at a time */}
+      <div className="ml-10 flex flex-col gap-3" role="radiogroup" aria-label={`Question ${question.order} options`}>
         {options.map((option) => (
-          <OptionButton
+          <RadioOption
             key={option.key}
             option={option}
             isSelected={selectedAnswer === option.key}
             onSelect={() => handleSelect(option.key)}
             disabled={disabled}
+            questionId={question.id}
+            name={`tfng-question-${question.id}`}
           />
         ))}
       </div>
@@ -223,8 +258,8 @@ export const TFNGQuestion = memo(function TFNGQuestion({
         </p>
       </div>
 
-      {/* Legend */}
-      <div className="mb-6 p-4 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded">
+      {/* Legend we don't need this right now that's why it's commented out */}
+      {/* <div className="mb-6 p-4 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {options.map((option) => (
             <div key={option.key} className="flex items-start gap-2">
@@ -252,7 +287,7 @@ export const TFNGQuestion = memo(function TFNGQuestion({
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Questions */}
       <div className="space-y-6">

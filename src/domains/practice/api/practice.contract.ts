@@ -66,6 +66,7 @@ export interface PracticeListItemDTO {
   attempts_count: number;
   best_score: number | null;
   last_attempt_date: string | null;
+  last_attempt: string | null;
   created_at: string;
   // Reading specific
   reading_passage_number?: number | null;

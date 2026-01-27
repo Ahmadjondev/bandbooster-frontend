@@ -77,6 +77,23 @@ const ChartIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
   </svg>
 );
+const RetryIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    {...props}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    {/* Circular arrow */}
+    <path d="M3 12a9 9 0 1 0 3-6.7" />
+    {/* Arrow head */}
+    <polyline points="3 3 3 9 9 9" />
+  </svg>
+);
+
 
 const ITEMS_PER_PAGE = 12;
 
@@ -454,9 +471,9 @@ export default function ReadingPracticePage() {
                           {/* Action Buttons */}
                           <div className="shrink-0 flex items-center gap-2">
                             {/* Last Result Button - Only show if completed */}
-                            {isCompleted && (
+                            {(practice.lastAttempt && isCompleted) && (
                               <Link
-                                href={`/practice/${practice.uuid}/results`}
+                                href={`/practice/${practice.lastAttempt}/results`}
                                 onClick={(e) => e.stopPropagation()}
                                 className="w-10 h-10 rounded-lg flex items-center justify-center text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                                 title="View last result"
@@ -470,12 +487,12 @@ export default function ReadingPracticePage() {
                               className={cn(
                                 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                                 isCompleted
-                                  ? 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                  ? 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border dark:border-neutral-600 border-neutral-300 '
                                   : 'bg-primary-600 text-white hover:bg-primary-700'
                               )}
                             >
                               {isCompleted ? 'Retry' : 'Start'}
-                              <PlayIcon className="w-4 h-4" />
+                              {isCompleted ? <RetryIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
                             </Link>
                           </div>
                         </div>
