@@ -1,0 +1,5705 @@
+openapi: 3.0.3
+info:
+  title: BandBooster IELTS Mock Exam API
+  version: 1.0.0
+  description: "\n    Comprehensive API documentation for BandBooster - A multi-tenant
+    IELTS exam platform.\n    \n    ## Architecture Overview\n    \n    ### Three-Dashboard
+    System\n    - **SuperAdmin** - System-wide management, bypasses tenant filtering\n
+    \   - **Manager** - Branch exam management, AI content generation\n    - **Student**
+    - Exam taking and results viewing\n    \n    ### Authentication\n    This API
+    uses JWT (JSON Web Tokens) for authentication. To authenticate:\n    1. Obtain
+    tokens via `/accounts/api/login/` endpoint\n    2. Include the access token in
+    the Authorization header: `Bearer <your_token>`\n    3. Refresh tokens using `/accounts/api/token/refresh/`
+    when access token expires\n    \n    ### IELTS Exam Types\n    - **LISTENING**
+    - 30 minutes, 4 parts with 40 questions\n    - **READING** - 60 minutes, 3 passages
+    with 40 questions\n    - **WRITING** - 60 minutes, 2 tasks (Task 1: 150 words,
+    Task 2: 250 words)\n    - **SPEAKING** - 14 minutes, 3 parts (Interview, Long
+    turn, Discussion)\n    - **FULL_TEST** - Complete IELTS exam with all sections\n
+    \   \n    ### Question Types\n    MCQ (Multiple Choice), MCMA (Multiple Choice
+    Multiple Answer), SA (Short Answer), \n    SC (Sentence Completion), SUC (Summary
+    Completion), NC (Note Completion), \n    FC (Form Completion), TC (Table Completion),
+    FCC (Flow Chart Completion), \n    TFNG (True/False/Not Given), YNNG (Yes/No/Not
+    Given), MH (Matching Headings), \n    MI (Matching Information), MF (Matching
+    Features), ML (Matching List), DL (Diagram Labeling)\n    "
+  contact:
+    name: BandBooster Support
+    email: support@bandbooster.uz
+  license:
+    name: Proprietary
+paths:
+
+  /classroom/api/content/listening_parts/:
+    get:
+      operationId: content_search_listening_parts
+      description: "\n        Search available listening parts to add to assignment
+        bundles.\n        \n        **Filters:**\n        - `q`: Text search in title
+        and description\n        - `part`: Filter by part number (1, 2, 3, 4)\n        \n
+        \       Returns top 20 matching results.\n        "
+      summary: Search listening parts
+      parameters:
+      - in: query
+        name: part
+        schema:
+          type: integer
+          enum:
+          - 1
+          - 2
+          - 3
+          - 4
+        description: Part number (1-4)
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+      tags:
+      - Classroom - Content Search
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSearchResponse'
+          description: ''
+  /classroom/api/content/mock_exams/:
+    get:
+      operationId: content_search_mock_exams
+      description: "\n        Search available mock exams to add to assignment bundles.\n
+        \       \n        **Filters:**\n        - `q`: Text search in title and description\n
+        \       - `type`: Filter by exam type (LISTENING, READING, WRITING, SPEAKING,
+        FULL_TEST)\n        - `difficulty`: Filter by difficulty level\n        \n
+        \       Returns top 20 matching results.\n        "
+      summary: Search mock exams
+      parameters:
+      - in: query
+        name: difficulty
+        schema:
+          type: string
+        description: Difficulty level
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - FULL_TEST
+          - LISTENING
+          - READING
+          - SPEAKING
+          - WRITING
+        description: Exam type
+      tags:
+      - Classroom - Content Search
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSearchResponse'
+          description: ''
+  /classroom/api/content/reading_passages/:
+    get:
+      operationId: content_search_reading_passages
+      description: "\n        Search available reading passages to add to assignment
+        bundles.\n        \n        **Filters:**\n        - `q`: Text search in title
+        and summary\n        - `difficulty`: Filter by difficulty level\n        \n
+        \       Returns top 20 matching results.\n        "
+      summary: Search reading passages
+      parameters:
+      - in: query
+        name: difficulty
+        schema:
+          type: string
+        description: Difficulty level
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+      tags:
+      - Classroom - Content Search
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSearchResponse'
+          description: ''
+  /classroom/api/content/speaking_topics/:
+    get:
+      operationId: content_search_speaking_topics
+      description: "\n        Search available speaking topics to add to assignment
+        bundles.\n        \n        **Filters:**\n        - `q`: Text search in title
+        and description\n        - `part`: Filter by part number (1, 2, 3)\n        \n
+        \       Returns top 20 matching results.\n        "
+      summary: Search speaking topics
+      parameters:
+      - in: query
+        name: part
+        schema:
+          type: integer
+          enum:
+          - 1
+          - 2
+          - 3
+        description: Part number (1, 2, or 3)
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+      tags:
+      - Classroom - Content Search
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSearchResponse'
+          description: ''
+  /classroom/api/content/teacher_exams/:
+    get:
+      operationId: content_search_teacher_exams
+      description: "\n        Search teacher's own published custom exams.\n        \n
+        \       **Filters:**\n        - `q`: Text search in title and description\n
+        \       \n        Only returns exams created by the authenticated teacher.\n
+        \       Returns top 20 matching results.\n        "
+      summary: Search teacher exams
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+      tags:
+      - Classroom - Content Search
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSearchResponse'
+          description: ''
+  /classroom/api/content/writing_tasks/:
+    get:
+      operationId: content_search_writing_tasks
+      description: "\n        Search available writing tasks to add to assignment
+        bundles.\n        \n        **Filters:**\n        - `q`: Text search in topic
+        and question\n        - `type`: Filter by task type (TASK1, TASK2)\n        \n
+        \       Returns top 20 matching results.\n        "
+      summary: Search writing tasks
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - TASK1
+          - TASK2
+        description: Task type
+      tags:
+      - Classroom - Content Search
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSearchResponse'
+          description: ''
+  /classroom/api/join/{invite_code}/:
+    get:
+      operationId: enrollment_check_invite_code
+      description: "\n        Check if an invite code is valid and get classroom preview
+        info.\n        \n        **Public Endpoint** - No authentication required.\n
+        \       \n        This allows students to preview classroom details before
+        signing in to join.\n        Returns classroom name, teacher name, description,
+        target band, and current student count.\n        \n        **Use Cases:**\n
+        \       - Preview classroom before joining\n        - Validate invite link/QR
+        code\n        - Show join confirmation screen\n        "
+      summary: Check invite code validity
+      parameters:
+      - in: path
+        name: invite_code
+        schema:
+          type: string
+        description: The classroom invite code (e.g., ABC12345)
+        required: true
+      tags:
+      - Classroom - Student Enrollment
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteCheckResponse'
+              examples:
+                ValidInviteCode:
+                  value:
+                    valid: true
+                    message: null
+                    classroom:
+                      name: IELTS Preparation Class A
+                      teacher: John Smith
+                      description: Intensive IELTS preparation course
+                      target_band: '7.0'
+                      student_count: 15
+                  summary: Valid Invite Code
+                ClassroomFull:
+                  value:
+                    valid: false
+                    message: Classroom is full
+                    classroom: null
+                  summary: Classroom Full
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteCheckResponse'
+              examples:
+                InvalidCode:
+                  value:
+                    valid: false
+                    message: Invalid invite code
+                    classroom: null
+                  summary: Invalid Code
+          description: ''
+  /classroom/api/teacher/classroom/{classroom_uuid}/feed/:
+    get:
+      operationId: teacher_classroom_feed
+      description: "\n        Get the full classroom feed for a teacher including
+        assignments and stats.\n        \n        **Returns:**\n        - Classroom
+        details (name, description, invite code, settings)\n        - Assignment bundles
+        with submission statistics\n        - Recent classroom messages\n        -
+        Aggregated classroom statistics\n        \n        **Statistics include:**\n
+        \       - Total students enrolled\n        - Assignment completion rates\n
+        \       - Pending grading count\n        - Published vs draft assignments\n
+        \       - Recent submission activity\n        \n        **Per-Assignment Stats:**\n
+        \       - Completion count and percentage\n        - Pending review count\n
+        \       - Average band score\n        - Top submissions preview\n        \n
+        \       **Use Cases:**\n        - Teacher dashboard/home view\n        - Assignment
+        management overview\n        - Student progress monitoring\n        "
+      summary: Get classroom feed
+      parameters:
+      - in: path
+        name: classroom_uuid
+        schema:
+          type: string
+        description: UUID of the classroom
+        required: true
+      tags:
+      - Classroom - Teacher Feed
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherClassroomFeedResponse'
+          description: ''
+        '401':
+          description: Authentication credentials not provided
+        '403':
+          description: User is not the classroom teacher
+        '404':
+          description: Classroom not found
+    post:
+      operationId: teacher_classroom_post_message
+      description: "\n        Post a new message to the classroom feed.\n        \n
+        \       **Message Types:**\n        - `MESSAGE`: General announcement\n        -
+        `ANNOUNCEMENT`: Important notice (highlighted)\n        - `REMINDER`: Assignment
+        reminder\n        - `UPDATE`: Progress update\n        \n        **Pinning:**\n
+        \       - Set `is_pinned: true` to pin to top of feed\n        - Pinned messages
+        appear first for all students\n        \n        **Visibility:**\n        -
+        All enrolled students can see the message\n        - Only the posting teacher
+        can edit/delete\n        "
+      summary: Post message
+      parameters:
+      - in: path
+        name: classroom_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Classroom - Teacher Feed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassroomMessageInputRequest'
+            examples:
+              PostAnnouncement:
+                value:
+                  content: New reading assignment due Friday!
+                  message_type: ANNOUNCEMENT
+                  is_pinned: true
+                summary: Post Announcement
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClassroomMessageInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClassroomMessageInputRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassroomMessageOutput'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+        '401':
+          description: Authentication credentials not provided
+        '403':
+          description: User is not the classroom teacher
+        '404':
+          description: Classroom not found
+  /classroom/api/teacher/classroom/{classroom_uuid}/messages/{message_uuid}/:
+    patch:
+      operationId: teacher_classroom_update_message
+      description: "\n        Update a classroom message (pin/unpin).\n        \n
+        \       **Supported Updates:**\n        - `is_pinned`: Pin or unpin the message\n
+        \       \n        **Pinned Messages:**\n        - Appear at the top of the
+        feed for all students\n        - Multiple messages can be pinned simultaneously\n
+        \       "
+      summary: Update message
+      parameters:
+      - in: path
+        name: classroom_uuid
+        schema:
+          type: string
+        description: UUID of the classroom
+        required: true
+      - in: path
+        name: message_uuid
+        schema:
+          type: string
+        description: UUID of the message to update
+        required: true
+      tags:
+      - Classroom - Teacher Feed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMessagePinUpdateInputRequest'
+            examples:
+              PinMessage:
+                value:
+                  is_pinned: true
+                summary: Pin Message
+              UnpinMessage:
+                value:
+                  is_pinned: false
+                summary: Unpin Message
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMessagePinUpdateInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMessagePinUpdateInputRequest'
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassroomMessageOutput'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+        '401':
+          description: Authentication credentials not provided
+        '403':
+          description: User is not the classroom teacher
+        '404':
+          description: Classroom or message not found
+    delete:
+      operationId: teacher_classroom_delete_message
+      description: "\n        Delete a message from the classroom feed.\n        \n
+        \       **Requirements:**\n        - Teacher must own the classroom\n        -
+        Message must exist in the classroom\n        \n        **Note:** Deletion
+        is permanent and cannot be undone.\n        "
+      summary: Delete message
+      parameters:
+      - in: path
+        name: classroom_uuid
+        schema:
+          type: string
+        description: UUID of the classroom
+        required: true
+      - in: path
+        name: message_uuid
+        schema:
+          type: string
+        description: UUID of the message to delete
+        required: true
+      tags:
+      - Classroom - Teacher Feed
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Message deleted successfully
+        '401':
+          description: Authentication credentials not provided
+        '403':
+          description: User is not the classroom teacher
+        '404':
+          description: Classroom or message not found
+components:
+  schemas:
+    AccessInfo:
+      type: object
+      description: Access info for item.
+      properties:
+        has_access:
+          type: boolean
+        requires_payment:
+          type: boolean
+        attempts_remaining:
+          type: integer
+        is_unlimited:
+          type: boolean
+        reason:
+          type: string
+      required:
+      - attempts_remaining
+      - has_access
+      - is_unlimited
+      - reason
+      - requires_payment
+    AnswerDetail:
+      type: object
+      description: Single answer detail.
+      properties:
+        question_id:
+          type: integer
+        question_number:
+          type: integer
+        question_text:
+          type: string
+        user_answer:
+          type: string
+        correct_answer:
+          type: string
+        is_correct:
+          type: boolean
+      required:
+      - correct_answer
+      - is_correct
+      - question_id
+      - question_number
+      - question_text
+      - user_answer
+    AnswerGroup:
+      type: object
+      description: Group of answers by question type.
+      properties:
+        question_type:
+          type: string
+        title:
+          type: string
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerDetail'
+      required:
+      - answers
+      - question_type
+      - title
+    AnswerSubmissionRequest:
+      type: object
+      description: Serializer for reading/listening answer submissions.
+      properties:
+        question_id:
+          type: integer
+          description: ID of the question being answered
+        answer:
+          type: string
+          description: User's answer text
+      required:
+      - answer
+      - question_id
+    AssignmentBundleInputRequest:
+      type: object
+      description: Input serializer for creating assignment bundles.
+      properties:
+        classroom_uuid:
+          type: string
+          format: uuid
+          description: UUID of the classroom this bundle belongs to.
+        title:
+          type: string
+          minLength: 1
+          description: Display title for the assignment (max 255 characters).
+          maxLength: 255
+        description:
+          type: string
+          description: Instructions and description for students.
+        assignment_type:
+          enum:
+          - HOMEWORK
+          - QUIZ
+          - PRACTICE
+          - EXAM
+          - REMEDIAL
+          type: string
+          x-spec-enum-id: 5f46bbfd6f15789c
+          default: HOMEWORK
+          description: |-
+            Type of assignment: HOMEWORK, QUIZ, PRACTICE, EXAM, or REMEDIAL.
+
+            * `HOMEWORK` - HOMEWORK
+            * `QUIZ` - QUIZ
+            * `PRACTICE` - PRACTICE
+            * `EXAM` - EXAM
+            * `REMEDIAL` - REMEDIAL
+        teacher_instructions:
+          type: string
+          description: Private instructions for AI grading (not shown to students).
+        available_from:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the assignment becomes available (ISO 8601 format).
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: Assignment due date (ISO 8601 format).
+        allow_late_submission:
+          type: boolean
+          default: true
+          description: Whether to accept submissions after due date.
+        time_limit_minutes:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: Optional time limit in minutes.
+        target_min_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+          description: Minimum target band for differentiated assignments.
+        target_max_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+          description: Maximum target band for differentiated assignments.
+        require_teacher_approval:
+          type: boolean
+          default: true
+          description: Whether AI grades need teacher approval before release.
+        auto_release_results:
+          type: boolean
+          default: false
+          description: Whether to auto-release results after AI grading.
+        allow_multiple_attempts:
+          type: boolean
+          default: false
+          description: Whether students can reattempt items.
+        max_attempts:
+          type: integer
+          maximum: 10
+          minimum: 1
+          default: 1
+          description: Maximum number of attempts allowed (1-10).
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleItemInputRequest'
+          description: List of content items to include in the bundle.
+      required:
+      - classroom_uuid
+      - title
+    AssignmentBundleListOutput:
+      type: object
+      description: Lightweight serializer for listing bundles.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        classroom_name:
+          type: string
+          readOnly: true
+        assignment_type:
+          enum:
+          - HOMEWORK
+          - QUIZ
+          - PRACTICE
+          - EXAM
+          - REMEDIAL
+          type: string
+          description: |-
+            * `HOMEWORK` - Homework
+            * `QUIZ` - Quiz
+            * `PRACTICE` - Practice
+            * `EXAM` - Exam
+            * `REMEDIAL` - Remedial Practice
+          x-spec-enum-id: 9da9abdf5e0c2a7f
+          readOnly: true
+        status:
+          enum:
+          - DRAFT
+          - PUBLISHED
+          - CLOSED
+          - ARCHIVED
+          type: string
+          description: |-
+            * `DRAFT` - Draft
+            * `PUBLISHED` - Published
+            * `CLOSED` - Closed
+            * `ARCHIVED` - Archived
+          x-spec-enum-id: 21d851c851547c4c
+          readOnly: true
+        due_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        total_items:
+          type: integer
+          readOnly: true
+        is_available:
+          type: boolean
+          readOnly: true
+        is_overdue:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assignment_type
+      - classroom_name
+      - created_at
+      - due_date
+      - id
+      - is_available
+      - is_overdue
+      - status
+      - title
+      - total_items
+      - uuid
+    AssignmentBundleOutput:
+      type: object
+      description: Standard assignment bundle output serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        classroom:
+          allOf:
+          - $ref: '#/components/schemas/ClassroomListOutput'
+          readOnly: true
+        created_by:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+          nullable: true
+        assignment_type:
+          enum:
+          - HOMEWORK
+          - QUIZ
+          - PRACTICE
+          - EXAM
+          - REMEDIAL
+          type: string
+          description: |-
+            * `HOMEWORK` - Homework
+            * `QUIZ` - Quiz
+            * `PRACTICE` - Practice
+            * `EXAM` - Exam
+            * `REMEDIAL` - Remedial Practice
+          x-spec-enum-id: 9da9abdf5e0c2a7f
+          readOnly: true
+        teacher_instructions:
+          type: string
+          readOnly: true
+          nullable: true
+        available_from:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        due_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        allow_late_submission:
+          type: boolean
+          readOnly: true
+        time_limit_minutes:
+          type: integer
+          readOnly: true
+          nullable: true
+        target_min_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        target_max_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        status:
+          enum:
+          - DRAFT
+          - PUBLISHED
+          - CLOSED
+          - ARCHIVED
+          type: string
+          description: |-
+            * `DRAFT` - Draft
+            * `PUBLISHED` - Published
+            * `CLOSED` - Closed
+            * `ARCHIVED` - Archived
+          x-spec-enum-id: 21d851c851547c4c
+          readOnly: true
+        require_teacher_approval:
+          type: boolean
+          readOnly: true
+        auto_release_results:
+          type: boolean
+          readOnly: true
+        allow_multiple_attempts:
+          type: boolean
+          readOnly: true
+        max_attempts:
+          type: integer
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleItemOutput'
+          readOnly: true
+        total_items:
+          type: integer
+          readOnly: true
+        is_available:
+          type: boolean
+          readOnly: true
+        is_overdue:
+          type: boolean
+          readOnly: true
+        submission_count:
+          type: integer
+          readOnly: true
+        pending_review_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - allow_late_submission
+      - allow_multiple_attempts
+      - assignment_type
+      - auto_release_results
+      - available_from
+      - classroom
+      - created_at
+      - created_by
+      - description
+      - due_date
+      - id
+      - is_available
+      - is_overdue
+      - items
+      - max_attempts
+      - pending_review_count
+      - published_at
+      - require_teacher_approval
+      - status
+      - submission_count
+      - target_max_band
+      - target_min_band
+      - teacher_instructions
+      - time_limit_minutes
+      - title
+      - total_items
+      - updated_at
+      - uuid
+    AssignmentFeedItem:
+      type: object
+      description: Assignment entry in classroom feed.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        bundle_uuid:
+          type: string
+          format: uuid
+        type:
+          type: string
+          default: ASSIGNMENT
+        title:
+          type: string
+        description:
+          type: string
+        assignment_type:
+          type: string
+        item_count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedItem'
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        available_from:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+        is_available:
+          type: boolean
+        is_overdue:
+          type: boolean
+        progress_percentage:
+          type: integer
+        band_score:
+          type: number
+          format: double
+          nullable: true
+        xp_earned:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - assignment_type
+      - available_from
+      - band_score
+      - bundle_uuid
+      - created_at
+      - description
+      - due_date
+      - id
+      - is_available
+      - is_overdue
+      - item_count
+      - items
+      - progress_percentage
+      - published_at
+      - status
+      - title
+      - uuid
+      - xp_earned
+    AttemptBalance:
+      type: object
+      description: Attempt balance for each section.
+      properties:
+        reading:
+          type: integer
+          nullable: true
+        listening:
+          type: integer
+          nullable: true
+        writing:
+          type: integer
+          nullable: true
+        speaking:
+          type: integer
+          nullable: true
+        full_test:
+          type: integer
+          nullable: true
+      required:
+      - full_test
+      - listening
+      - reading
+      - speaking
+      - writing
+    AttemptDetailResponse:
+      type: object
+      description: Response serializer for get_attempt endpoint.
+      properties:
+        attempt:
+          allOf:
+          - $ref: '#/components/schemas/AttemptOutput'
+          description: Attempt details
+        practice:
+          allOf:
+          - $ref: '#/components/schemas/PracticeDetailOutput'
+          description: Practice content
+        detailed_results:
+          type: object
+          additionalProperties: {}
+          description: User's submitted answers
+      required:
+      - attempt
+      - detailed_results
+      - practice
+    AttemptOutput:
+      type: object
+      description: Serializer for practice attempts.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        practice_title:
+          type: string
+          readOnly: true
+        section_type:
+          type: string
+          readOnly: true
+        status:
+          enum:
+          - COMPLETED
+          - ABANDONED
+          type: string
+          description: |-
+            * `COMPLETED` - Completed
+            * `ABANDONED` - Abandoned
+          x-spec-enum-id: 129e7c2a93c14f37
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: When the user started the practice (from frontend)
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        time_spent_seconds:
+          type: integer
+          readOnly: true
+          title: Time Spent (seconds)
+        score:
+          type: number
+          format: double
+          nullable: true
+          description: Convert DecimalField score to float.
+          readOnly: true
+        correct_answers:
+          type: integer
+          readOnly: true
+        total_questions:
+          type: integer
+          readOnly: true
+        accuracy:
+          type: number
+          format: double
+          readOnly: true
+        ai_feedback:
+          type: string
+          readOnly: true
+          nullable: true
+      required:
+      - accuracy
+      - ai_feedback
+      - completed_at
+      - correct_answers
+      - practice_title
+      - score
+      - section_type
+      - started_at
+      - status
+      - time_spent_seconds
+      - total_questions
+      - uuid
+    AttemptResultResponse:
+      type: object
+      description: Response serializer for get_attempt_result endpoint.
+      properties:
+        attempt_uuid:
+          type: string
+          format: uuid
+        practice_uuid:
+          type: string
+          format: uuid
+        practice_title:
+          type: string
+        section_type:
+          enum:
+          - READING
+          - LISTENING
+          - WRITING
+          - SPEAKING
+          type: string
+          description: |-
+            * `READING` - READING
+            * `LISTENING` - LISTENING
+            * `WRITING` - WRITING
+            * `SPEAKING` - SPEAKING
+          x-spec-enum-id: 5f2512cf99086db7
+        test_type:
+          enum:
+          - FULL_TEST
+          - SECTION_PRACTICE
+          type: string
+          description: |-
+            * `FULL_TEST` - FULL_TEST
+            * `SECTION_PRACTICE` - SECTION_PRACTICE
+          x-spec-enum-id: c775fead96e41fea
+        score:
+          type: number
+          format: double
+          nullable: true
+        correct_answers:
+          type: integer
+        total_questions:
+          type: integer
+        accuracy:
+          type: number
+          format: double
+        time_spent_seconds:
+          type: integer
+        detailed_results:
+          type: object
+          additionalProperties: {}
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - accuracy
+      - attempt_uuid
+      - completed_at
+      - correct_answers
+      - detailed_results
+      - practice_title
+      - practice_uuid
+      - score
+      - section_type
+      - test_type
+      - time_spent_seconds
+      - total_questions
+    AzureScores:
+      type: object
+      description: Azure Speech SDK evaluation scores.
+      properties:
+        pronunciation:
+          type: number
+          format: double
+          nullable: true
+        fluency:
+          type: number
+          format: double
+          nullable: true
+        accuracy:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - accuracy
+      - fluency
+      - pronunciation
+    BookInfo:
+      type: object
+      description: Book info.
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+      required:
+      - id
+      - title
+    BundleInfo:
+      type: object
+      description: Bundle info for review.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        title:
+          type: string
+        assignment_type:
+          type: string
+        classroom_name:
+          type: string
+      required:
+      - assignment_type
+      - classroom_name
+      - title
+      - uuid
+    BundleItemInputRequest:
+      type: object
+      description: Input serializer for creating bundle items.
+      properties:
+        item_type:
+          enum:
+          - MOCK_EXAM
+          - TEACHER_EXAM
+          - WRITING_TASK
+          - SPEAKING_TOPIC
+          - READING_PASSAGE
+          - LISTENING_PART
+          type: string
+          x-spec-enum-id: 5e4b9ab5d37c9201
+          description: |-
+            Type of content item. Required if not using content_type/content_id.
+
+            * `MOCK_EXAM` - MOCK_EXAM
+            * `TEACHER_EXAM` - TEACHER_EXAM
+            * `WRITING_TASK` - WRITING_TASK
+            * `SPEAKING_TOPIC` - SPEAKING_TOPIC
+            * `READING_PASSAGE` - READING_PASSAGE
+            * `LISTENING_PART` - LISTENING_PART
+        content_type:
+          type: string
+          minLength: 1
+          description: Alternative way to specify item type. Use with content_id.
+        content_id:
+          type: integer
+          description: ID of the content item. Use with content_type.
+        item_instructions:
+          type: string
+          description: Additional instructions for this specific item.
+        order:
+          type: integer
+          default: 0
+          description: Display order within the bundle (lower numbers first).
+        points:
+          type: integer
+          minimum: 0
+          default: 100
+          description: 'Points this item is worth (default: 100).'
+        is_required:
+          type: boolean
+          default: true
+          description: Whether this item is required for bundle completion.
+        mock_exam:
+          type: integer
+          description: ID of MockExam (for MOCK_EXAM item_type).
+        teacher_exam:
+          type: integer
+          description: ID of TeacherExam (for TEACHER_EXAM item_type).
+        writing_task:
+          type: integer
+          description: ID of WritingTask (for WRITING_TASK item_type).
+        speaking_topic:
+          type: integer
+          description: ID of SpeakingTopic (for SPEAKING_TOPIC item_type).
+        reading_passage:
+          type: integer
+          description: ID of ReadingPassage (for READING_PASSAGE item_type).
+        listening_part:
+          type: integer
+          description: ID of ListeningPart (for LISTENING_PART item_type).
+    BundleItemOutput:
+      type: object
+      description: Output serializer for bundle items.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        item_type:
+          enum:
+          - MOCK_EXAM
+          - TEACHER_EXAM
+          - WRITING_TASK
+          - SPEAKING_TOPIC
+          - READING_PASSAGE
+          - LISTENING_PART
+          type: string
+          description: |-
+            * `MOCK_EXAM` - Full Mock Exam
+            * `TEACHER_EXAM` - Teacher Exam
+            * `WRITING_TASK` - Writing Task
+            * `SPEAKING_TOPIC` - Speaking Topic
+            * `READING_PASSAGE` - Reading Passage
+            * `LISTENING_PART` - Listening Part
+          x-spec-enum-id: c8ccc472bbc0463e
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+        content_id:
+          type: integer
+          nullable: true
+          readOnly: true
+        content_title:
+          type: string
+          readOnly: true
+        content_object:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          readOnly: true
+        item_instructions:
+          type: string
+          readOnly: true
+          nullable: true
+        order:
+          type: integer
+          readOnly: true
+        points:
+          type: integer
+          readOnly: true
+        is_required:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_id
+      - content_object
+      - content_title
+      - content_type
+      - created_at
+      - id
+      - is_required
+      - item_instructions
+      - item_type
+      - order
+      - points
+      - uuid
+    ClassroomAnalyticsOutput:
+      type: object
+      description: Serializer for classroom analytics data.
+      properties:
+        total_students:
+          type: integer
+        active_students:
+          type: integer
+        average_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        assignments_published:
+          type: integer
+        pending_reviews:
+          type: integer
+        completion_rate:
+          type: number
+          format: double
+        section_averages:
+          type: object
+          additionalProperties: {}
+        skill_breakdown:
+          type: object
+          additionalProperties: {}
+      required:
+      - active_students
+      - assignments_published
+      - average_band
+      - completion_rate
+      - pending_reviews
+      - section_averages
+      - total_students
+    ClassroomAnalyticsResponse:
+      type: object
+      description: Detailed classroom analytics response.
+      properties:
+        total_students:
+          type: integer
+        active_students:
+          type: integer
+        average_band:
+          type: number
+          format: double
+          nullable: true
+        completion_rate:
+          type: number
+          format: double
+        skill_breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillBreakdown'
+        top_performers:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentAnalytics'
+        struggling_students:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentAnalytics'
+      required:
+      - active_students
+      - average_band
+      - completion_rate
+      - skill_breakdown
+      - struggling_students
+      - top_performers
+      - total_students
+    ClassroomContext:
+      type: object
+      description: Classroom context for item.
+      properties:
+        classroom_uuid:
+          type: string
+          format: uuid
+        assignment_uuid:
+          type: string
+          format: uuid
+        bundle_uuid:
+          type: string
+          format: uuid
+        item_uuid:
+          type: string
+          format: uuid
+      required:
+      - assignment_uuid
+      - bundle_uuid
+      - classroom_uuid
+      - item_uuid
+    ClassroomDetailOutput:
+      type: object
+      description: Detailed classroom serializer with enrollments.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        teacher:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+          nullable: true
+        target_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        invite_code:
+          type: string
+          readOnly: true
+        invite_enabled:
+          type: boolean
+          readOnly: true
+        max_students:
+          type: integer
+          readOnly: true
+        status:
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - SUSPENDED
+          type: string
+          description: |-
+            * `ACTIVE` - Active
+            * `ARCHIVED` - Archived
+            * `SUSPENDED` - Suspended
+          x-spec-enum-id: a1ffb129c84a2692
+          readOnly: true
+        student_count:
+          type: integer
+          readOnly: true
+        is_full:
+          type: boolean
+          readOnly: true
+        magic_link:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        enrollments:
+          type: array
+          items: {}
+          readOnly: true
+        assignment_count:
+          type: integer
+          readOnly: true
+        active_assignments:
+          type: integer
+          readOnly: true
+      required:
+      - active_assignments
+      - assignment_count
+      - created_at
+      - description
+      - enrollments
+      - id
+      - invite_code
+      - invite_enabled
+      - is_full
+      - magic_link
+      - max_students
+      - name
+      - status
+      - student_count
+      - target_band
+      - teacher
+      - updated_at
+      - uuid
+    ClassroomInfo:
+      type: object
+      description: Classroom info returned when checking invite code.
+      properties:
+        name:
+          type: string
+        teacher:
+          type: string
+          description: Teacher's full name
+        description:
+          type: string
+        target_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+        student_count:
+          type: integer
+      required:
+      - description
+      - name
+      - student_count
+      - target_band
+      - teacher
+    ClassroomInputRequest:
+      type: object
+      description: Input serializer for creating/updating classrooms.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Display name of the classroom (max 255 characters).
+          maxLength: 255
+        description:
+          type: string
+          description: Optional description of the classroom.
+        target_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+          description: Target IELTS band score for this class (1.0 to 9.0).
+        max_students:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          description: 'Maximum number of students allowed (1-500, default: 50).'
+        invite_enabled:
+          type: boolean
+          default: true
+          description: Whether students can join using the invite code.
+        status:
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - SUSPENDED
+          type: string
+          x-spec-enum-id: 1e3d5f572ddad43e
+          default: ACTIVE
+          description: |-
+            Classroom status: ACTIVE, ARCHIVED, or SUSPENDED.
+
+            * `ACTIVE` - ACTIVE
+            * `ARCHIVED` - ARCHIVED
+            * `SUSPENDED` - SUSPENDED
+      required:
+      - name
+    ClassroomListOutput:
+      type: object
+      description: |-
+        Lightweight serializer for listing classrooms.
+        Uses annotations when available.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+          nullable: true
+        teacher_name:
+          type: string
+          readOnly: true
+        target_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        status:
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - SUSPENDED
+          type: string
+          description: |-
+            * `ACTIVE` - Active
+            * `ARCHIVED` - Archived
+            * `SUSPENDED` - Suspended
+          x-spec-enum-id: a1ffb129c84a2692
+          readOnly: true
+        student_count:
+          type: integer
+          readOnly: true
+        assignment_count:
+          type: integer
+          readOnly: true
+        pending_grading:
+          type: integer
+          readOnly: true
+        invite_code:
+          type: string
+          readOnly: true
+        invite_enabled:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assignment_count
+      - created_at
+      - description
+      - id
+      - invite_code
+      - invite_enabled
+      - name
+      - pending_grading
+      - status
+      - student_count
+      - target_band
+      - teacher_name
+      - uuid
+    ClassroomMessageInputRequest:
+      type: object
+      description: Input serializer for creating classroom messages.
+      properties:
+        content:
+          type: string
+          minLength: 1
+          description: The message content (max 5000 characters).
+          maxLength: 5000
+        message_type:
+          enum:
+          - ANNOUNCEMENT
+          - MESSAGE
+          type: string
+          x-spec-enum-id: 09ef9d71fe8f67ca
+          default: MESSAGE
+          description: |-
+            Type of message: ANNOUNCEMENT for important notices, MESSAGE for general posts.
+
+            * `ANNOUNCEMENT` - ANNOUNCEMENT
+            * `MESSAGE` - MESSAGE
+        is_pinned:
+          type: boolean
+          default: false
+          description: Whether to pin the message to the top of the feed.
+      required:
+      - content
+    ClassroomMessageOutput:
+      type: object
+      description: Output serializer for classroom messages.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        classroom:
+          type: integer
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        message_type:
+          enum:
+          - ANNOUNCEMENT
+          - MESSAGE
+          - SYSTEM
+          type: string
+          description: |-
+            * `ANNOUNCEMENT` - Announcement
+            * `MESSAGE` - Message
+            * `SYSTEM` - System Message
+          x-spec-enum-id: 8813b03fa01190e0
+          readOnly: true
+        content:
+          type: string
+          readOnly: true
+        is_pinned:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - classroom
+      - content
+      - created_at
+      - id
+      - is_pinned
+      - message_type
+      - updated_at
+      - uuid
+    ClassroomOutput:
+      type: object
+      description: Standard classroom output serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        teacher:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+          nullable: true
+        target_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        invite_code:
+          type: string
+          readOnly: true
+        invite_enabled:
+          type: boolean
+          readOnly: true
+        max_students:
+          type: integer
+          readOnly: true
+        status:
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - SUSPENDED
+          type: string
+          description: |-
+            * `ACTIVE` - Active
+            * `ARCHIVED` - Archived
+            * `SUSPENDED` - Suspended
+          x-spec-enum-id: a1ffb129c84a2692
+          readOnly: true
+        student_count:
+          type: integer
+          readOnly: true
+        is_full:
+          type: boolean
+          readOnly: true
+        magic_link:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - description
+      - id
+      - invite_code
+      - invite_enabled
+      - is_full
+      - magic_link
+      - max_students
+      - name
+      - status
+      - student_count
+      - target_band
+      - teacher
+      - updated_at
+      - uuid
+    ClassroomQuestion:
+      type: object
+      description: Question in classroom test head.
+      properties:
+        id:
+          type: integer
+          description: Question ID
+        order:
+          type: integer
+          description: Display order
+        question_text:
+          type: string
+          description: The question text
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomQuestionOption'
+          description: MCQ options if applicable
+      required:
+      - id
+      - options
+      - order
+      - question_text
+    ClassroomQuestionOption:
+      type: object
+      description: Question option in classroom item content.
+      properties:
+        id:
+          type: integer
+          description: Option ID
+        key:
+          type: string
+          description: Option key (A, B, C, D)
+        choice_text:
+          type: string
+          description: Option text
+      required:
+      - choice_text
+      - id
+      - key
+    ClassroomTestHead:
+      type: object
+      description: Test head with questions for classroom items.
+      properties:
+        id:
+          type: integer
+          description: Test head ID
+        question_type:
+          type: string
+          description: Question type (MCQ, TFNG, FB, etc.)
+        title:
+          type: string
+          description: Test head title
+        description:
+          type: string
+          description: Instructions for this question group
+        question_data:
+          type: object
+          additionalProperties: {}
+          description: Additional question configuration data
+        example:
+          type: string
+          nullable: true
+          description: Example answer if provided
+        picture:
+          type: string
+          format: uri
+          nullable: true
+          description: Image URL if applicable
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomQuestion'
+          description: Questions in this group
+      required:
+      - description
+      - example
+      - id
+      - picture
+      - question_data
+      - question_type
+      - questions
+      - title
+    CompleteSpeakingInputRequest:
+      type: object
+      description: |-
+        Serializer for completing speaking practice.
+
+        Used by: submit_speaking_complete
+      properties:
+        session_id:
+          type: string
+          minLength: 1
+          description: Session ID for the recordings
+        time_spent:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Total time spent in seconds
+        started_at:
+          type: string
+          format: date-time
+          description: When the practice was started (ISO format)
+      required:
+      - session_id
+    ContentSearchItem:
+      type: object
+      description: Generic content item for search results.
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+      required:
+      - id
+      - title
+    ContentSearchResponse:
+      type: object
+      description: Generic response for content search endpoints.
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSearchItem'
+          description: List of matching content items
+      required:
+      - results
+    EnrollmentJoinInputRequest:
+      type: object
+      description: Input serializer for joining a classroom.
+      properties:
+        invite_code:
+          type: string
+          minLength: 1
+          description: 8-character invite code (case-insensitive).
+          maxLength: 20
+      required:
+      - invite_code
+    EnrollmentOutput:
+      type: object
+      description: Standard enrollment output serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        classroom:
+          allOf:
+          - $ref: '#/components/schemas/ClassroomListOutput'
+          readOnly: true
+        student:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        status:
+          enum:
+          - PENDING
+          - ACTIVE
+          - SUSPENDED
+          - LEFT
+          - REMOVED
+          type: string
+          description: |-
+            * `PENDING` - Pending Approval
+            * `ACTIVE` - Active
+            * `SUSPENDED` - Suspended
+            * `LEFT` - Left
+            * `REMOVED` - Removed by Teacher
+          x-spec-enum-id: 3b6c6268d90c844c
+          readOnly: true
+        current_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        listening_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        reading_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        writing_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        speaking_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        notes:
+          type: string
+          readOnly: true
+          nullable: true
+        last_active:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        xp:
+          type: integer
+          readOnly: true
+        enrolled_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - classroom
+      - current_band
+      - enrolled_at
+      - id
+      - last_active
+      - listening_band
+      - notes
+      - reading_band
+      - speaking_band
+      - status
+      - student
+      - updated_at
+      - uuid
+      - writing_band
+      - xp
+    ErrorResponse:
+      type: object
+      description: Standard error response.
+      properties:
+        error:
+          type: string
+          description: Error message describing what went wrong
+      required:
+      - error
+    ExamAttempt:
+      type: object
+      description: Serializer for exam attempts.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        exam:
+          type: integer
+        exam_title:
+          type: string
+          nullable: true
+          description: Get exam title.
+          readOnly: true
+        exam_type:
+          type: string
+          nullable: true
+          description: Get exam type.
+          readOnly: true
+        status:
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETED
+          - EVALUATED
+          type: string
+          description: |-
+            * `NOT_STARTED` - Not Started
+            * `IN_PROGRESS` - In Progress
+            * `COMPLETED` - Completed
+            * `EVALUATED` - Evaluated
+          x-spec-enum-id: 716aada72bbe1b10
+        current_section:
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETED
+          - EVALUATED
+          type: string
+          description: |-
+            * `NOT_STARTED` - Not Started
+            * `IN_PROGRESS` - In Progress
+            * `COMPLETED` - Completed
+            * `EVALUATED` - Evaluated
+          x-spec-enum-id: 716aada72bbe1b10
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          readOnly: true
+        time_remaining:
+          type: integer
+          description: Calculate remaining time in seconds.
+          readOnly: true
+        progress:
+          type: number
+          format: double
+          description: Get progress percentage.
+          readOnly: true
+      required:
+      - completed_at
+      - exam
+      - exam_title
+      - exam_type
+      - id
+      - progress
+      - time_remaining
+      - uuid
+    FeedItem:
+      type: object
+      description: Assignment item in feed.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        item_type:
+          type: string
+        title:
+          type: string
+        order:
+          type: integer
+        status:
+          type: string
+        instructions:
+          type: string
+          nullable: true
+      required:
+      - instructions
+      - item_type
+      - order
+      - status
+      - title
+      - uuid
+    GoogleAuthInputRequest:
+      type: object
+      description: Serializer for Google authentication input.
+      properties:
+        token:
+          type: string
+          minLength: 1
+      required:
+      - token
+    GradingQueueResponse:
+      type: object
+      description: Response for grading queue.
+      properties:
+        count:
+          type: integer
+          description: Total items in queue
+        assignments:
+          type: array
+          items: {}
+          description: List of assignments pending review
+      required:
+      - assignments
+      - count
+    GradingStatsResponse:
+      type: object
+      description: Response for grading statistics.
+      properties:
+        pending_count:
+          type: integer
+        graded_today:
+          type: integer
+        avg_grade_time_minutes:
+          type: integer
+        override_rate:
+          type: number
+          format: double
+        total_graded:
+          type: integer
+      required:
+      - avg_grade_time_minutes
+      - graded_today
+      - override_rate
+      - pending_count
+      - total_graded
+    InviteCheckResponse:
+      type: object
+      description: Response for checking invite code validity.
+      properties:
+        valid:
+          type: boolean
+          description: Whether the invite code is valid
+        message:
+          type: string
+          nullable: true
+          description: Error message if invalid
+        classroom:
+          allOf:
+          - $ref: '#/components/schemas/ClassroomInfo'
+          nullable: true
+      required:
+      - classroom
+      - message
+      - valid
+    InviteCodeResponse:
+      type: object
+      description: Response for regenerate invite code.
+      properties:
+        invite_code:
+          type: string
+          description: New 8-character invite code
+        magic_link:
+          type: string
+          format: uri
+          description: Full join URL with invite code
+      required:
+      - invite_code
+      - magic_link
+    InviteToggleResponse:
+      type: object
+      description: Response for toggle invite status.
+      properties:
+        invite_enabled:
+          type: boolean
+          description: Whether invites are enabled
+      required:
+      - invite_enabled
+    ItemContentResponse:
+      type: object
+      description: Response for getting item content.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        source:
+          type: string
+          default: classroom
+        classroom_context:
+          $ref: '#/components/schemas/ClassroomContext'
+        book:
+          $ref: '#/components/schemas/BookInfo'
+        section_type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        order:
+          type: integer
+        is_locked:
+          type: boolean
+        duration_minutes:
+          type: integer
+          nullable: true
+        user_status:
+          $ref: '#/components/schemas/UserStatus'
+        is_free:
+          type: boolean
+        access_info:
+          $ref: '#/components/schemas/AccessInfo'
+        total_questions:
+          type: integer
+        reading_passage:
+          $ref: '#/components/schemas/ReadingContent'
+        listening_part:
+          $ref: '#/components/schemas/ListeningContent'
+      required:
+      - access_info
+      - book
+      - classroom_context
+      - description
+      - duration_minutes
+      - is_free
+      - is_locked
+      - order
+      - section_type
+      - title
+      - total_questions
+      - user_status
+      - uuid
+    ItemResultResponse:
+      type: object
+      description: Response for item result.
+      properties:
+        score:
+          type: number
+          format: double
+        correct_answers:
+          type: integer
+        total_questions:
+          type: integer
+        accuracy_percentage:
+          type: number
+          format: double
+        time_spent:
+          type: integer
+        attempt_count:
+          type: integer
+        section:
+          $ref: '#/components/schemas/SectionInfo'
+        book:
+          $ref: '#/components/schemas/BookInfo'
+        classroom_context:
+          $ref: '#/components/schemas/ClassroomContext'
+        answer_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerGroup'
+      required:
+      - accuracy_percentage
+      - answer_groups
+      - attempt_count
+      - book
+      - classroom_context
+      - correct_answers
+      - score
+      - section
+      - time_spent
+      - total_questions
+    ItemSubmissionDetail:
+      type: object
+      description: Item submission detail for review.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        item_type:
+          type: string
+        content_title:
+          type: string
+        status:
+          type: string
+        score:
+          type: number
+          format: double
+        max_score:
+          type: number
+          format: double
+        band_score:
+          type: number
+          format: double
+          nullable: true
+        time_spent_seconds:
+          type: integer
+          nullable: true
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        answer_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerGroup'
+        writing_answer:
+          type: string
+        word_count:
+          type: integer
+        ai_feedback:
+          type: object
+          additionalProperties: {}
+        teacher_feedback:
+          type: string
+          nullable: true
+      required:
+      - band_score
+      - content_title
+      - item_type
+      - max_score
+      - score
+      - status
+      - submitted_at
+      - time_spent_seconds
+      - uuid
+    ItemSubmitResponse:
+      type: object
+      description: Response after submitting item answers.
+      properties:
+        success:
+          type: boolean
+        score:
+          $ref: '#/components/schemas/ItemSubmitScore'
+        xp_earned:
+          type: integer
+          description: XP points earned
+        is_reattempt:
+          type: boolean
+        attempt_count:
+          type: integer
+        best_score:
+          type: number
+          format: double
+          nullable: true
+        item_submission_id:
+          type: integer
+        redirect_url:
+          type: string
+      required:
+      - attempt_count
+      - best_score
+      - is_reattempt
+      - item_submission_id
+      - redirect_url
+      - score
+      - success
+      - xp_earned
+    ItemSubmitScore:
+      type: object
+      description: |-
+        Score details after item submission.
+
+        For single sections (passage/part): Returns correct/total + percentage only.
+        For full tests (full reading/listening): Returns correct/total + percentage + band_score.
+      properties:
+        correct_answers:
+          type: integer
+          description: Number of correct answers
+        total_questions:
+          type: integer
+          description: Total number of questions
+        percentage:
+          type: number
+          format: double
+          description: Percentage score (correct/total * 100)
+        is_full_test:
+          type: boolean
+          description: True if this is a full test (40 questions) with band score
+        band_score:
+          type: number
+          format: double
+          nullable: true
+          description: IELTS band score (only for full tests with 20+ questions)
+      required:
+      - correct_answers
+      - is_full_test
+      - percentage
+      - total_questions
+    LeaderboardEntry:
+      type: object
+      description: Single leaderboard entry.
+      properties:
+        rank:
+          type: integer
+        student:
+          $ref: '#/components/schemas/LeaderboardStudent'
+        xp:
+          type: integer
+        current_band:
+          type: number
+          format: double
+          nullable: true
+        assignments_completed:
+          type: integer
+        is_current_user:
+          type: boolean
+      required:
+      - assignments_completed
+      - current_band
+      - is_current_user
+      - rank
+      - student
+      - xp
+    LeaderboardResponse:
+      type: object
+      description: Response for classroom leaderboard.
+      properties:
+        leaderboard:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderboardEntry'
+        my_rank:
+          type: integer
+          nullable: true
+        my_xp:
+          type: integer
+        total_students:
+          type: integer
+      required:
+      - leaderboard
+      - my_rank
+      - my_xp
+      - total_students
+    LeaderboardStudent:
+      type: object
+      description: Student info in leaderboard.
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - id
+      - name
+      - profile_image
+      - username
+    ListeningContent:
+      type: object
+      description: Listening part content.
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        part_number:
+          type: integer
+        audio_url:
+          type: string
+          format: uri
+          nullable: true
+        test_heads:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomTestHead'
+      required:
+      - audio_url
+      - id
+      - part_number
+      - test_heads
+      - title
+    ListeningPart:
+      type: object
+      description: Serializer for listening parts with questions.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        part_number:
+          enum:
+          - 1
+          - 2
+          - 3
+          - 4
+          type: integer
+          description: |-
+            * `1` - Part 1
+            * `2` - Part 2
+            * `3` - Part 3
+            * `4` - Part 4
+          x-spec-enum-id: 7e9d8783576a254e
+          minimum: 1
+          maximum: 4
+        title:
+          type: string
+          nullable: true
+          maxLength: 150
+        description:
+          type: string
+          nullable: true
+        audio_url:
+          type: string
+          nullable: true
+          description: Get full URL for audio file.
+          readOnly: true
+        test_heads:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestHead'
+          readOnly: true
+        total_questions:
+          type: integer
+          description: Count total questions - uses prefetched data.
+          readOnly: true
+      required:
+      - audio_url
+      - id
+      - part_number
+      - test_heads
+      - total_questions
+    LoginInputRequest:
+      type: object
+      description: Serializer for user login input.
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Username or email address
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    MessageAuthor:
+      type: object
+      description: Message author info.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - id
+      - name
+      - profile_image
+    MessageFeedItem:
+      type: object
+      description: Message entry in classroom feed.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        type:
+          type: string
+          default: MESSAGE
+        message_type:
+          type: string
+        content:
+          type: string
+        author:
+          $ref: '#/components/schemas/MessageAuthor'
+        is_pinned:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - author
+      - content
+      - created_at
+      - id
+      - is_pinned
+      - message_type
+      - uuid
+    MockExam:
+      type: object
+      description: Full serializer for mock exams.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          title: Exam Title
+          maxLength: 255
+        exam_type:
+          enum:
+          - LISTENING
+          - READING
+          - WRITING
+          - SPEAKING
+          - LISTENING_READING
+          - LISTENING_READING_WRITING
+          - FULL_TEST
+          type: string
+          description: |-
+            * `LISTENING` - Listening
+            * `READING` - Reading
+            * `WRITING` - Writing
+            * `SPEAKING` - Speaking
+            * `LISTENING_READING` - Listening + Reading
+            * `LISTENING_READING_WRITING` - Listening + Reading + Writing
+            * `FULL_TEST` - Full Test
+          x-spec-enum-id: 3cbfbf4abd9720dd
+        exam_type_display:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          nullable: true
+        duration_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+          nullable: true
+          title: Duration (minutes)
+          description: Leave empty to use IELTS standard duration
+        default_duration:
+          type: integer
+          description: Get default IELTS duration in minutes.
+          readOnly: true
+        section_durations:
+          type: object
+          additionalProperties: {}
+          description: Get durations for each section type.
+          readOnly: true
+        difficulty_level:
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+          - EXPERT
+          type: string
+          description: |-
+            * `BEGINNER` - Beginner (Band 3-4)
+            * `INTERMEDIATE` - Intermediate (Band 5-6)
+            * `ADVANCED` - Advanced (Band 7-8)
+            * `EXPERT` - Expert (Band 8.5-9)
+          x-spec-enum-id: 11078dc6b867486c
+        difficulty_display:
+          type: string
+          readOnly: true
+        total_questions:
+          type: integer
+          description: Get total question count.
+          readOnly: true
+        is_active:
+          type: boolean
+          title: Active
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Teacher or Manager who created this mock exam
+        created_by_name:
+          type: string
+          nullable: true
+          description: Get creator's name.
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - created_by_name
+      - default_duration
+      - difficulty_display
+      - exam_type
+      - exam_type_display
+      - id
+      - section_durations
+      - title
+      - total_questions
+      - updated_at
+      - uuid
+    MockExamList:
+      type: object
+      description: Lightweight serializer for mock exam lists.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Unique identifier for secure access
+        title:
+          type: string
+          title: Exam Title
+          maxLength: 255
+        exam_type:
+          enum:
+          - LISTENING
+          - READING
+          - WRITING
+          - SPEAKING
+          - LISTENING_READING
+          - LISTENING_READING_WRITING
+          - FULL_TEST
+          type: string
+          description: |-
+            * `LISTENING` - Listening
+            * `READING` - Reading
+            * `WRITING` - Writing
+            * `SPEAKING` - Speaking
+            * `LISTENING_READING` - Listening + Reading
+            * `LISTENING_READING_WRITING` - Listening + Reading + Writing
+            * `FULL_TEST` - Full Test
+          x-spec-enum-id: 3cbfbf4abd9720dd
+        exam_type_display:
+          type: string
+          readOnly: true
+        difficulty_level:
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+          - EXPERT
+          type: string
+          description: |-
+            * `BEGINNER` - Beginner (Band 3-4)
+            * `INTERMEDIATE` - Intermediate (Band 5-6)
+            * `ADVANCED` - Advanced (Band 7-8)
+            * `EXPERT` - Expert (Band 8.5-9)
+          x-spec-enum-id: 11078dc6b867486c
+        is_active:
+          type: boolean
+          title: Active
+      required:
+      - exam_type
+      - exam_type_display
+      - id
+      - title
+      - uuid
+    OnboardingInputRequest:
+      type: object
+      description: Serializer for onboarding input.
+      properties:
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        target_score:
+          enum:
+          - '5.5'
+          - '6.0'
+          - '6.5'
+          - '7.0'
+          - '7.5'
+          - '8.0'
+          - '8.5'
+          - '9.0'
+          - null
+          type: string
+          description: |-
+            * `5.5` - Band 5.5
+            * `6.0` - Band 6.0
+            * `6.5` - Band 6.5
+            * `7.0` - Band 7.0
+            * `7.5` - Band 7.5
+            * `8.0` - Band 8.0
+            * `8.5` - Band 8.5
+            * `9.0` - Band 9.0
+          x-spec-enum-id: 5f1c2d9f824a8378
+          nullable: true
+        exam_type:
+          enum:
+          - ACADEMIC
+          - GENERAL
+          - UKVI
+          - null
+          type: string
+          description: |-
+            * `ACADEMIC` - Academic
+            * `GENERAL` - General Training
+            * `UKVI` - UKVI (UK Visas and Immigration)
+          x-spec-enum-id: c43aedef46b6a6a5
+          nullable: true
+        exam_date:
+          type: string
+          format: date
+          nullable: true
+        heard_from:
+          enum:
+          - GOOGLE
+          - SOCIAL_MEDIA
+          - FRIEND
+          - YOUTUBE
+          - TELEGRAM
+          - OTHER
+          - null
+          type: string
+          description: |-
+            * `GOOGLE` - Google Search
+            * `SOCIAL_MEDIA` - Social Media
+            * `FRIEND` - Friend or Family
+            * `YOUTUBE` - YouTube
+            * `TELEGRAM` - Telegram
+            * `OTHER` - Other
+          x-spec-enum-id: 29d296101e83edbd
+          nullable: true
+        main_goal:
+          enum:
+          - STUDY_ABROAD
+          - IMMIGRATION
+          - WORK
+          - PERSONAL
+          - OTHER
+          - null
+          type: string
+          description: |-
+            * `STUDY_ABROAD` - Study Abroad
+            * `IMMIGRATION` - Immigration
+            * `WORK` - Work or Career
+            * `PERSONAL` - Personal Development
+            * `OTHER` - Other
+          x-spec-enum-id: 0db2b42f7ddddf90
+          nullable: true
+    OverallStats:
+      type: object
+      description: Overall user statistics.
+      properties:
+        total_attempts:
+          type: integer
+        total_completed:
+          type: integer
+        average_score:
+          type: number
+          format: double
+          nullable: true
+        total_time_spent_seconds:
+          type: integer
+      required:
+      - average_score
+      - total_attempts
+      - total_completed
+      - total_time_spent_seconds
+    PaginatedAssignmentBundleListOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignmentBundleListOutput'
+    PaginatedClassroomListOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomListOutput'
+    PaginatedEnrollmentOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentOutput'
+    PaginatedStudentAssignmentListOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentAssignmentListOutput'
+    PaginatedStudentRosterOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentRosterOutput'
+    PatchedAssignmentBundleInputRequest:
+      type: object
+      description: Input serializer for creating assignment bundles.
+      properties:
+        classroom_uuid:
+          type: string
+          format: uuid
+          description: UUID of the classroom this bundle belongs to.
+        title:
+          type: string
+          minLength: 1
+          description: Display title for the assignment (max 255 characters).
+          maxLength: 255
+        description:
+          type: string
+          description: Instructions and description for students.
+        assignment_type:
+          enum:
+          - HOMEWORK
+          - QUIZ
+          - PRACTICE
+          - EXAM
+          - REMEDIAL
+          type: string
+          x-spec-enum-id: 5f46bbfd6f15789c
+          default: HOMEWORK
+          description: |-
+            Type of assignment: HOMEWORK, QUIZ, PRACTICE, EXAM, or REMEDIAL.
+
+            * `HOMEWORK` - HOMEWORK
+            * `QUIZ` - QUIZ
+            * `PRACTICE` - PRACTICE
+            * `EXAM` - EXAM
+            * `REMEDIAL` - REMEDIAL
+        teacher_instructions:
+          type: string
+          description: Private instructions for AI grading (not shown to students).
+        available_from:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the assignment becomes available (ISO 8601 format).
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: Assignment due date (ISO 8601 format).
+        allow_late_submission:
+          type: boolean
+          default: true
+          description: Whether to accept submissions after due date.
+        time_limit_minutes:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: Optional time limit in minutes.
+        target_min_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+          description: Minimum target band for differentiated assignments.
+        target_max_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+          description: Maximum target band for differentiated assignments.
+        require_teacher_approval:
+          type: boolean
+          default: true
+          description: Whether AI grades need teacher approval before release.
+        auto_release_results:
+          type: boolean
+          default: false
+          description: Whether to auto-release results after AI grading.
+        allow_multiple_attempts:
+          type: boolean
+          default: false
+          description: Whether students can reattempt items.
+        max_attempts:
+          type: integer
+          maximum: 10
+          minimum: 1
+          default: 1
+          description: Maximum number of attempts allowed (1-10).
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleItemInputRequest'
+          description: List of content items to include in the bundle.
+    PatchedClassroomInputRequest:
+      type: object
+      description: Input serializer for creating/updating classrooms.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Display name of the classroom (max 255 characters).
+          maxLength: 255
+        description:
+          type: string
+          description: Optional description of the classroom.
+        target_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          nullable: true
+          description: Target IELTS band score for this class (1.0 to 9.0).
+        max_students:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          description: 'Maximum number of students allowed (1-500, default: 50).'
+        invite_enabled:
+          type: boolean
+          default: true
+          description: Whether students can join using the invite code.
+        status:
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - SUSPENDED
+          type: string
+          x-spec-enum-id: 1e3d5f572ddad43e
+          default: ACTIVE
+          description: |-
+            Classroom status: ACTIVE, ARCHIVED, or SUSPENDED.
+
+            * `ACTIVE` - ACTIVE
+            * `ARCHIVED` - ARCHIVED
+            * `SUSPENDED` - SUSPENDED
+    PatchedMessagePinUpdateInputRequest:
+      type: object
+      description: Input serializer for updating message pin status.
+      properties:
+        is_pinned:
+          type: boolean
+          description: Set to true to pin the message, false to unpin.
+    PatchedProfileUpdateInputRequest:
+      type: object
+      description: Serializer for profile update input.
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 20
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+    PerformanceData:
+      type: object
+      description: Strength/weakness data.
+      properties:
+        question_type:
+          type: string
+        label:
+          type: string
+        correct:
+          type: integer
+        total:
+          type: integer
+        accuracy:
+          type: number
+          format: double
+      required:
+      - accuracy
+      - correct
+      - label
+      - question_type
+      - total
+    PracticeDetailOutput:
+      type: object
+      description: Detailed serializer for section practice with full content.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          description: Practice section title
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+        section_type:
+          enum:
+          - LISTENING
+          - READING
+          - WRITING
+          - SPEAKING
+          type: string
+          description: |-
+            * `LISTENING` - Listening
+            * `READING` - Reading
+            * `WRITING` - Writing
+            * `SPEAKING` - Speaking
+          x-spec-enum-id: 76526de253b9d3cf
+        section_type_display:
+          type: string
+          readOnly: true
+        test_type:
+          enum:
+          - FULL_TEST
+          - SECTION_PRACTICE
+          type: string
+          description: |-
+            * `FULL_TEST` - Full Test
+            * `SECTION_PRACTICE` - Section Practice
+          x-spec-enum-id: e60048cfb829fedb
+        difficulty:
+          enum:
+          - EASY
+          - MEDIUM
+          - HARD
+          - EXPERT
+          type: string
+          description: |-
+            * `EASY` - Easy (Band 4-5)
+            * `MEDIUM` - Medium (Band 5.5-6.5)
+            * `HARD` - Hard (Band 7-8)
+            * `EXPERT` - Expert (Band 8.5-9)
+          x-spec-enum-id: 47a01b4a5ba3fd59
+        difficulty_display:
+          type: string
+          readOnly: true
+        duration:
+          type: integer
+          readOnly: true
+        total_questions:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Total number of questions in this practice
+        is_premium:
+          type: boolean
+          title: Premium Only
+          description: Requires premium subscription
+        is_multi_content:
+          type: boolean
+          readOnly: true
+        content_count:
+          type: integer
+          readOnly: true
+        contents:
+          type: array
+          items: {}
+          description: Get all content items for multi-content practices.
+          readOnly: true
+        user_attempts:
+          type: array
+          items: {}
+          description: Get user's previous attempts.
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_count
+      - contents
+      - created_at
+      - difficulty_display
+      - duration
+      - is_multi_content
+      - section_type
+      - section_type_display
+      - title
+      - user_attempts
+      - uuid
+    ProfileUpdateInputRequest:
+      type: object
+      description: Serializer for profile update input.
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 20
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+    Question:
+      type: object
+      description: Serializer for individual questions.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question_text:
+          type: string
+          nullable: true
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+          description: The order in which the question appears for this passage.
+        question_type:
+          type: string
+          description: Get the display name of the question type.
+          readOnly: true
+        options:
+          type: array
+          items: {}
+          description: Get choices for MCQ questions - uses prefetched data.
+          readOnly: true
+        user_answer:
+          type: string
+          description: Get user's answer if available from context.
+          readOnly: true
+        correct_answer_text:
+          type: string
+          nullable: true
+          description: The correct answer for T/F/NG or Short Answer questions.
+          maxLength: 200
+        answer_two_text:
+          type: string
+          nullable: true
+          description: Second correct answer for MCMA questions
+          maxLength: 200
+        answer_three_text:
+          type: string
+          nullable: true
+          description: Third correct answer for MCMA questions
+          maxLength: 200
+        max_selections:
+          type: integer
+          nullable: true
+          description: Get max selections for MCMA questions.
+          readOnly: true
+      required:
+      - id
+      - max_selections
+      - options
+      - order
+      - question_type
+      - user_answer
+    QuestionTypePerformance:
+      type: object
+      description: Performance by question type.
+      properties:
+        correct:
+          type: integer
+        total:
+          type: integer
+      required:
+      - correct
+      - total
+    ReadingContent:
+      type: object
+      description: Reading passage content.
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        passage_number:
+          type: integer
+        content:
+          type: string
+        passage:
+          type: string
+        test_heads:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomTestHead'
+      required:
+      - content
+      - id
+      - passage
+      - passage_number
+      - test_heads
+      - title
+    ReadingPassage:
+      type: object
+      description: Serializer for reading passages with questions.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        passage_number:
+          enum:
+          - 1
+          - 2
+          - 3
+          type: integer
+          description: |-
+            * `1` - Passage 1
+            * `2` - Passage 2
+            * `3` - Passage 3
+          x-spec-enum-id: 2e3c7371d53b3782
+          minimum: 1
+          maximum: 3
+        title:
+          type: string
+          nullable: true
+          description: Optional title for the reading passage.
+          maxLength: 255
+        summary:
+          type: string
+          nullable: true
+          description: A brief summary or introduction to the passage.
+        content:
+          type: string
+          description: The full text of the reading passage.
+        word_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          description: Approximate word count of the passage
+        test_heads:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestHead'
+          readOnly: true
+        total_questions:
+          type: integer
+          description: Count total questions - uses prefetched data.
+          readOnly: true
+      required:
+      - content
+      - id
+      - passage_number
+      - test_heads
+      - total_questions
+    RegisterInputRequest:
+      type: object
+      description: Serializer for user registration input.
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+      required:
+      - confirm_password
+      - email
+      - first_name
+      - last_name
+      - password
+      - username
+    RemoveStudentInputRequest:
+      type: object
+      description: Input for removing a student.
+      properties:
+        student_id:
+          type: integer
+          description: ID of the student to remove
+      required:
+      - student_id
+    ReviewAnalysis:
+      type: object
+      description: Analysis section of review.
+      properties:
+        question_types:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/QuestionTypePerformance'
+        strengths:
+          type: array
+          items:
+            $ref: '#/components/schemas/PerformanceData'
+        weaknesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PerformanceData'
+      required:
+      - question_types
+      - strengths
+      - weaknesses
+    ReviewSummary:
+      type: object
+      description: Summary for submission review.
+      properties:
+        total_correct:
+          type: integer
+        total_questions:
+          type: integer
+        accuracy:
+          type: number
+          format: double
+        band_score:
+          type: number
+          format: double
+          nullable: true
+        xp_earned:
+          type: integer
+      required:
+      - accuracy
+      - band_score
+      - total_correct
+      - total_questions
+      - xp_earned
+    SectionAttemptBalanceResponse:
+      type: object
+      description: Response serializer for section attempt balance endpoint.
+      properties:
+        is_premium:
+          type: boolean
+        balances:
+          $ref: '#/components/schemas/AttemptBalance'
+      required:
+      - balances
+      - is_premium
+    SectionInfo:
+      type: object
+      description: Section info in result.
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        order:
+          type: integer
+      required:
+      - id
+      - order
+      - title
+    SectionSpecificStatsResponse:
+      type: object
+      description: Response serializer for section-specific stats endpoint.
+      properties:
+        section_type:
+          type: string
+        attempts:
+          type: integer
+        completed:
+          type: integer
+        average_score:
+          type: number
+          format: double
+          nullable: true
+        best_score:
+          type: number
+          format: double
+          nullable: true
+        total_time_spent:
+          type: integer
+        recent_attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttemptOutput'
+      required:
+      - attempts
+      - average_score
+      - best_score
+      - completed
+      - recent_attempts
+      - section_type
+      - total_time_spent
+    SectionStatsDetail:
+      type: object
+      description: Statistics for a specific section type.
+      properties:
+        attempts:
+          type: integer
+        completed:
+          type: integer
+        average_score:
+          type: number
+          format: double
+          nullable: true
+        best_score:
+          type: number
+          format: double
+          nullable: true
+        total_time_spent:
+          type: integer
+      required:
+      - attempts
+      - average_score
+      - best_score
+      - completed
+      - total_time_spent
+    SkillBreakdown:
+      type: object
+      description: Skill breakdown stats.
+      properties:
+        skill:
+          type: string
+        average_band:
+          type: number
+          format: double
+          nullable: true
+        total_attempts:
+          type: integer
+        improvement:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - average_band
+      - improvement
+      - skill
+      - total_attempts
+    SpeakingQuestion:
+      type: object
+      description: Serializer for speaking questions.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question_text:
+          type: string
+        audio_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        cue_card_points:
+          nullable: true
+          description: JSON array of cue card points (for Part 2 main question only)
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        question_key:
+          type: string
+          description: Generate question key for frontend.
+          readOnly: true
+        preparation_time:
+          type: integer
+          description: Get preparation time based on part type.
+          readOnly: true
+        response_time:
+          type: integer
+          description: Get response time based on part type.
+          readOnly: true
+        user_answer:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          description: Get user's speaking answer for this question.
+          readOnly: true
+      required:
+      - id
+      - preparation_time
+      - question_key
+      - question_text
+      - response_time
+      - user_answer
+    SpeakingSubmissionRequest:
+      type: object
+      description: Serializer for speaking audio submissions.
+      properties:
+        question_key:
+          type: string
+          minLength: 1
+          description: Question key in format speaking_PART_X_qY
+        audio_file:
+          type: string
+          format: binary
+          description: Audio recording file
+      required:
+      - audio_file
+      - question_key
+    SpeakingTopic:
+      type: object
+      description: Serializer for speaking topics.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        speaking_type:
+          enum:
+          - PART_1
+          - PART_2
+          - PART_3
+          type: string
+          x-spec-enum-id: fb76a124572989a4
+          title: Speaking Part
+          description: |-
+            The part of speaking test
+
+            * `PART_1` - Part 1: Introduction & Interview
+            * `PART_2` - Part 2: Individual Long Turn
+            * `PART_3` - Part 3: Two-way Discussion
+        part_display:
+          type: string
+          readOnly: true
+        topic:
+          type: string
+          maxLength: 255
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakingQuestion'
+          readOnly: true
+        user_attempt:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          description: Get user's speaking attempt info.
+          readOnly: true
+      required:
+      - id
+      - part_display
+      - questions
+      - topic
+      - user_attempt
+    StudentAnalytics:
+      type: object
+      description: Individual student analytics.
+      properties:
+        student_id:
+          type: integer
+        student_name:
+          type: string
+        current_band:
+          type: number
+          format: double
+          nullable: true
+        assignments_completed:
+          type: integer
+        average_score:
+          type: number
+          format: double
+          nullable: true
+        xp:
+          type: integer
+        last_active:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - assignments_completed
+      - average_score
+      - current_band
+      - last_active
+      - student_id
+      - student_name
+      - xp
+    StudentAssignmentDetailOutput:
+      type: object
+      description: Detailed student assignment with bundle items.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        bundle:
+          type: object
+          additionalProperties: {}
+          description: Return bundle with items for detail view.
+          readOnly: true
+        student:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        status:
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - SUBMITTED
+          - AI_PROCESSED
+          - PENDING_REVIEW
+          - TEACHER_REVIEWED
+          - RETURNED
+          - COMPLETED
+          type: string
+          description: |-
+            * `NOT_STARTED` - Not Started
+            * `IN_PROGRESS` - In Progress
+            * `SUBMITTED` - Submitted
+            * `AI_PROCESSED` - AI Processed
+            * `PENDING_REVIEW` - Pending Teacher Review
+            * `TEACHER_REVIEWED` - Teacher Reviewed
+            * `RETURNED` - Returned to Student
+            * `COMPLETED` - Completed
+          x-spec-enum-id: 5862aa77e50abab9
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        ai_processed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        teacher_reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        overall_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        band_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        ai_feedback:
+          readOnly: true
+          nullable: true
+        ai_tentative_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        teacher_feedback:
+          type: string
+          readOnly: true
+          nullable: true
+        teacher_reviewed_by:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        score_overridden:
+          type: boolean
+          readOnly: true
+        item_progress:
+          readOnly: true
+        is_late:
+          type: boolean
+          readOnly: true
+        results_visible:
+          type: boolean
+          readOnly: true
+        progress_percentage:
+          type: number
+          format: double
+          readOnly: true
+        item_submissions:
+          type: array
+          items: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - ai_feedback
+      - ai_processed_at
+      - ai_tentative_score
+      - band_score
+      - bundle
+      - completed_at
+      - created_at
+      - id
+      - is_late
+      - item_progress
+      - item_submissions
+      - overall_score
+      - progress_percentage
+      - results_visible
+      - score_overridden
+      - started_at
+      - status
+      - student
+      - submitted_at
+      - teacher_feedback
+      - teacher_reviewed_at
+      - teacher_reviewed_by
+      - updated_at
+      - uuid
+    StudentAssignmentListOutput:
+      type: object
+      description: Lightweight serializer for listing student assignments.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        bundle_title:
+          type: string
+          readOnly: true
+        student_name:
+          type: string
+          readOnly: true
+        classroom_name:
+          type: string
+          readOnly: true
+        status:
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - SUBMITTED
+          - AI_PROCESSED
+          - PENDING_REVIEW
+          - TEACHER_REVIEWED
+          - RETURNED
+          - COMPLETED
+          type: string
+          description: |-
+            * `NOT_STARTED` - Not Started
+            * `IN_PROGRESS` - In Progress
+            * `SUBMITTED` - Submitted
+            * `AI_PROCESSED` - AI Processed
+            * `PENDING_REVIEW` - Pending Teacher Review
+            * `TEACHER_REVIEWED` - Teacher Reviewed
+            * `RETURNED` - Returned to Student
+            * `COMPLETED` - Completed
+          x-spec-enum-id: 5862aa77e50abab9
+          readOnly: true
+        band_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        ai_tentative_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        is_late:
+          type: boolean
+          readOnly: true
+        progress_percentage:
+          type: number
+          format: double
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        correct_questions:
+          type: integer
+          readOnly: true
+        total_questions:
+          type: integer
+          readOnly: true
+        xp_earned:
+          type: integer
+          readOnly: true
+      required:
+      - ai_tentative_score
+      - band_score
+      - bundle_title
+      - classroom_name
+      - correct_questions
+      - created_at
+      - id
+      - is_late
+      - progress_percentage
+      - status
+      - student_name
+      - submitted_at
+      - total_questions
+      - uuid
+      - xp_earned
+    StudentAssignmentOutput:
+      type: object
+      description: Standard student assignment output serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        bundle:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentBundleListOutput'
+          readOnly: true
+        student:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        status:
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - SUBMITTED
+          - AI_PROCESSED
+          - PENDING_REVIEW
+          - TEACHER_REVIEWED
+          - RETURNED
+          - COMPLETED
+          type: string
+          description: |-
+            * `NOT_STARTED` - Not Started
+            * `IN_PROGRESS` - In Progress
+            * `SUBMITTED` - Submitted
+            * `AI_PROCESSED` - AI Processed
+            * `PENDING_REVIEW` - Pending Teacher Review
+            * `TEACHER_REVIEWED` - Teacher Reviewed
+            * `RETURNED` - Returned to Student
+            * `COMPLETED` - Completed
+          x-spec-enum-id: 5862aa77e50abab9
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        ai_processed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        teacher_reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        overall_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        band_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        ai_feedback:
+          readOnly: true
+          nullable: true
+        ai_tentative_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        teacher_feedback:
+          type: string
+          readOnly: true
+          nullable: true
+        teacher_reviewed_by:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        score_overridden:
+          type: boolean
+          readOnly: true
+        item_progress:
+          readOnly: true
+        is_late:
+          type: boolean
+          readOnly: true
+        results_visible:
+          type: boolean
+          readOnly: true
+        progress_percentage:
+          type: number
+          format: double
+          readOnly: true
+        item_submissions:
+          type: array
+          items: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - ai_feedback
+      - ai_processed_at
+      - ai_tentative_score
+      - band_score
+      - bundle
+      - completed_at
+      - created_at
+      - id
+      - is_late
+      - item_progress
+      - item_submissions
+      - overall_score
+      - progress_percentage
+      - results_visible
+      - score_overridden
+      - started_at
+      - status
+      - student
+      - submitted_at
+      - teacher_feedback
+      - teacher_reviewed_at
+      - teacher_reviewed_by
+      - updated_at
+      - uuid
+    StudentClassroomDetail:
+      type: object
+      description: Classroom detail for student view.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        teacher:
+          $ref: '#/components/schemas/TeacherInfo'
+        target_band:
+          type: number
+          format: double
+          nullable: true
+        student_count:
+          type: integer
+        status:
+          type: string
+        enrollment_id:
+          type: integer
+        current_band:
+          type: number
+          format: double
+          nullable: true
+        xp:
+          type: integer
+        joined_at:
+          type: string
+          format: date-time
+        assignments_count:
+          type: integer
+        pending_assignments:
+          type: integer
+        completed_assignments:
+          type: integer
+      required:
+      - assignments_count
+      - completed_assignments
+      - current_band
+      - description
+      - enrollment_id
+      - id
+      - joined_at
+      - name
+      - pending_assignments
+      - status
+      - student_count
+      - target_band
+      - teacher
+      - uuid
+      - xp
+    StudentClassroomFeedResponse:
+      type: object
+      description: Response for student classroom feed.
+      properties:
+        classroom:
+          $ref: '#/components/schemas/StudentClassroomDetail'
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignmentFeedItem'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageFeedItem'
+        total_count:
+          type: integer
+      required:
+      - assignments
+      - classroom
+      - messages
+      - total_count
+    StudentInfo:
+      type: object
+      description: Student info for review.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - email
+      - id
+      - name
+      - profile_image
+    StudentItemSubmissionInputRequest:
+      type: object
+      description: Input serializer for student item submissions.
+      properties:
+        writing_answer:
+          type: string
+          description: Student's writing response text.
+        speaking_audio:
+          type: string
+          format: binary
+          description: Audio file for speaking submission.
+        speaking_transcript:
+          type: string
+          description: Transcript of speaking submission (auto-generated or manual).
+        answers_json:
+          description: JSON object of answers for reading/listening items.
+        time_spent_seconds:
+          type: integer
+          minimum: 0
+          description: Time spent on this item in seconds.
+    StudentItemSubmissionOutput:
+      type: object
+      description: Output serializer for item submissions.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        bundle_item:
+          allOf:
+          - $ref: '#/components/schemas/BundleItemOutput'
+          readOnly: true
+        bundle_item_id:
+          type: integer
+          readOnly: true
+        status:
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - SUBMITTED
+          - COMPLETED
+          - AI_GRADED
+          - TEACHER_REVIEWED
+          type: string
+          description: |-
+            * `NOT_STARTED` - Not Started
+            * `IN_PROGRESS` - In Progress
+            * `SUBMITTED` - Submitted
+            * `COMPLETED` - Completed
+            * `AI_GRADED` - AI Graded
+            * `TEACHER_REVIEWED` - Teacher Reviewed
+          x-spec-enum-id: 39539c4a074cd119
+          readOnly: true
+        writing_answer:
+          type: string
+          readOnly: true
+          nullable: true
+        word_count:
+          type: integer
+          readOnly: true
+        speaking_audio:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        speaking_transcript:
+          type: string
+          readOnly: true
+          nullable: true
+        answers_json:
+          readOnly: true
+          nullable: true
+        score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        max_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        band_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        xp_earned:
+          type: integer
+          readOnly: true
+        attempt_count:
+          type: integer
+          readOnly: true
+        best_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        best_band_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        ai_feedback:
+          readOnly: true
+          nullable: true
+        ai_inline_corrections:
+          type: string
+          readOnly: true
+          nullable: true
+        teacher_feedback:
+          type: string
+          readOnly: true
+          nullable: true
+        teacher_score_override:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        time_spent_seconds:
+          type: integer
+          readOnly: true
+        final_score:
+          type: number
+          format: double
+          nullable: true
+          description: Return the final score (teacher override or AI score).
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - ai_feedback
+      - ai_inline_corrections
+      - answers_json
+      - attempt_count
+      - band_score
+      - best_band_score
+      - best_score
+      - bundle_item
+      - bundle_item_id
+      - created_at
+      - final_score
+      - id
+      - max_score
+      - score
+      - speaking_audio
+      - speaking_transcript
+      - started_at
+      - status
+      - submitted_at
+      - teacher_feedback
+      - teacher_score_override
+      - time_spent_seconds
+      - updated_at
+      - uuid
+      - word_count
+      - writing_answer
+      - xp_earned
+    StudentRosterOutput:
+      type: object
+      description: |-
+        Serializer for teacher's roster view.
+        Uses annotations when available.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        student:
+          allOf:
+          - $ref: '#/components/schemas/UserBasic'
+          readOnly: true
+        status:
+          enum:
+          - PENDING
+          - ACTIVE
+          - SUSPENDED
+          - LEFT
+          - REMOVED
+          type: string
+          description: |-
+            * `PENDING` - Pending Approval
+            * `ACTIVE` - Active
+            * `SUSPENDED` - Suspended
+            * `LEFT` - Left
+            * `REMOVED` - Removed by Teacher
+          x-spec-enum-id: 3b6c6268d90c844c
+          readOnly: true
+        current_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        listening_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        reading_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        writing_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        speaking_band:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        last_active:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        xp:
+          type: integer
+          readOnly: true
+        enrolled_at:
+          type: string
+          format: date-time
+          readOnly: true
+        assignments_completed:
+          type: integer
+          readOnly: true
+        assignments_pending:
+          type: integer
+          readOnly: true
+        average_score:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+          nullable: true
+      required:
+      - assignments_completed
+      - assignments_pending
+      - average_score
+      - current_band
+      - enrolled_at
+      - id
+      - last_active
+      - listening_band
+      - notes
+      - reading_band
+      - speaking_band
+      - status
+      - student
+      - uuid
+      - writing_band
+      - xp
+    SubmissionReviewResponse:
+      type: object
+      description: Full submission review response.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        status:
+          type: string
+        student:
+          $ref: '#/components/schemas/StudentInfo'
+        bundle:
+          $ref: '#/components/schemas/BundleInfo'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemSubmissionDetail'
+        summary:
+          $ref: '#/components/schemas/ReviewSummary'
+        analysis:
+          $ref: '#/components/schemas/ReviewAnalysis'
+        is_late:
+          type: boolean
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        ai_feedback:
+          nullable: true
+        teacher_feedback:
+          type: string
+          nullable: true
+      required:
+      - ai_feedback
+      - analysis
+      - bundle
+      - completed_at
+      - is_late
+      - items
+      - status
+      - student
+      - submitted_at
+      - summary
+      - teacher_feedback
+      - uuid
+    SubmitAnswersInputRequest:
+      type: object
+      description: |-
+        Serializer for submitting reading/listening answers.
+
+        Used by: submit_answers, submit_practice_as_section
+      properties:
+        answers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Dictionary mapping question_id (string) to user's answer
+        started_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when user started the practice
+        time_spent_seconds:
+          type: integer
+          minimum: 0
+          description: Time spent on practice in seconds
+      required:
+      - answers
+      - started_at
+      - time_spent_seconds
+    SubmitAnswersResponse:
+      type: object
+      description: Response serializer for submit_answers endpoint.
+      properties:
+        success:
+          type: boolean
+          description: Whether submission was successful
+        attempt_uuid:
+          type: string
+          format: uuid
+          description: UUID of created attempt
+        is_full_test:
+          type: boolean
+          description: Whether practice was a full test
+        band_score:
+          type: number
+          format: double
+          nullable: true
+          description: IELTS band score (only for full tests)
+        percentage_score:
+          type: number
+          format: double
+          nullable: true
+          description: Percentage score (only for single sections)
+        correct_answers:
+          type: integer
+          description: Number of correct answers
+        total_questions:
+          type: integer
+          description: Total number of questions
+        accuracy:
+          type: number
+          format: double
+          description: Accuracy percentage (0-100)
+        time_spent_seconds:
+          type: integer
+          description: Time spent in seconds
+      required:
+      - accuracy
+      - attempt_uuid
+      - band_score
+      - correct_answers
+      - is_full_test
+      - percentage_score
+      - success
+      - time_spent_seconds
+      - total_questions
+    SubmitSpeakingAnswerResponse:
+      type: object
+      description: Response serializer for submit_speaking_answer endpoint.
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        question_key:
+          type: string
+        file_url:
+          type: string
+        session_id:
+          type: string
+      required:
+      - file_url
+      - message
+      - question_key
+      - session_id
+      - success
+    SubmitSpeakingCompleteResponse:
+      type: object
+      description: Response serializer for submit_speaking_complete endpoint.
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        attempt_uuid:
+          type: string
+          format: uuid
+        score:
+          type: number
+          format: double
+          nullable: true
+        evaluation:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        azure_scores:
+          allOf:
+          - $ref: '#/components/schemas/AzureScores'
+          nullable: true
+        ai_error:
+          type: string
+          nullable: true
+      required:
+      - attempt_uuid
+      - azure_scores
+      - evaluation
+      - message
+      - score
+      - success
+    SubmitWritingInputRequest:
+      type: object
+      description: |-
+        Serializer for submitting writing response.
+
+        Used by: submit_writing
+      properties:
+        response:
+          type: string
+          minLength: 50
+          description: Writing response text (minimum 50 characters)
+        time_spent:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Time spent on writing in seconds
+        started_at:
+          type: string
+          format: date-time
+          description: When the practice was started (ISO format)
+      required:
+      - response
+    SubmitWritingResponse:
+      type: object
+      description: Response serializer for submit_writing endpoint.
+      properties:
+        message:
+          type: string
+        attempt_uuid:
+          type: string
+          format: uuid
+        word_count:
+          type: integer
+        min_words:
+          type: integer
+        meets_word_count:
+          type: boolean
+        band_score:
+          type: number
+          format: double
+          nullable: true
+        feedback:
+          type: string
+          nullable: true
+        evaluation:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        ai_error:
+          type: string
+          nullable: true
+      required:
+      - attempt_uuid
+      - band_score
+      - evaluation
+      - feedback
+      - meets_word_count
+      - message
+      - min_words
+      - word_count
+    SuccessResponse:
+      type: object
+      description: Standard success response.
+      properties:
+        success:
+          type: boolean
+          default: true
+    TeacherAssignmentFeedItem:
+      type: object
+      description: Assignment entry in teacher feed.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        type:
+          type: string
+          default: ASSIGNMENT
+        title:
+          type: string
+        description:
+          type: string
+        assignment_type:
+          type: string
+        item_count:
+          type: integer
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+        is_overdue:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        assigned_count:
+          type: integer
+        completed_count:
+          type: integer
+        pending_review_count:
+          type: integer
+        completion_percentage:
+          type: number
+          format: double
+        average_band:
+          type: number
+          format: double
+          nullable: true
+        top_submissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopSubmission'
+      required:
+      - assigned_count
+      - assignment_type
+      - average_band
+      - completed_count
+      - completion_percentage
+      - created_at
+      - description
+      - due_date
+      - id
+      - is_overdue
+      - item_count
+      - pending_review_count
+      - status
+      - title
+      - top_submissions
+      - uuid
+    TeacherClassroomFeedResponse:
+      type: object
+      description: Response for teacher classroom feed.
+      properties:
+        classroom:
+          $ref: '#/components/schemas/TeacherClassroomInfo'
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherAssignmentFeedItem'
+        stats:
+          $ref: '#/components/schemas/TeacherClassroomStats'
+        total_count:
+          type: integer
+      required:
+      - assignments
+      - classroom
+      - stats
+      - total_count
+    TeacherClassroomInfo:
+      type: object
+      description: Teacher classroom info.
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        invite_code:
+          type: string
+        invite_enabled:
+          type: boolean
+        target_band:
+          type: number
+          format: double
+          nullable: true
+        student_count:
+          type: integer
+      required:
+      - description
+      - id
+      - invite_code
+      - invite_enabled
+      - name
+      - status
+      - student_count
+      - target_band
+      - uuid
+    TeacherClassroomStats:
+      type: object
+      description: Classroom statistics for teacher.
+      properties:
+        total_students:
+          type: integer
+        total_assignments:
+          type: integer
+        pending_grading:
+          type: integer
+        average_completion_rate:
+          type: number
+          format: double
+        published_assignments:
+          type: integer
+        draft_assignments:
+          type: integer
+        recent_submissions:
+          type: integer
+      required:
+      - average_completion_rate
+      - draft_assignments
+      - pending_grading
+      - published_assignments
+      - recent_submissions
+      - total_assignments
+      - total_students
+    TeacherGradeInputRequest:
+      type: object
+      description: Input serializer for teacher grading actions.
+      properties:
+        action:
+          enum:
+          - approve
+          - override
+          - return
+          type: string
+          x-spec-enum-id: b64ea868c7a5c140
+          description: |-
+            Grading action: 'approve' AI grade, 'override' with new score, or 'return' for revision.
+
+            * `approve` - approve
+            * `override` - override
+            * `return` - return
+        score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,1})?$
+          description: IELTS band score (1.0-9.0). Required when action is 'override'.
+        feedback:
+          type: string
+          description: Teacher feedback. Required when action is 'return'.
+      required:
+      - action
+    TeacherInfo:
+      type: object
+      description: Teacher info in classroom detail.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - email
+      - id
+      - name
+      - profile_image
+      - username
+    TelegramCreateVerificationInputRequest:
+      type: object
+      description: Serializer for creating Telegram verification.
+      properties:
+        telegram_id:
+          type: integer
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        username:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        first_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+      required:
+      - phone_number
+      - telegram_id
+    TelegramVerifyInputRequest:
+      type: object
+      description: Serializer for Telegram verification input.
+      properties:
+        code:
+          type: string
+          minLength: 6
+          maxLength: 6
+      required:
+      - code
+    TestHead:
+      type: object
+      description: Serializer for question groups (TestHead).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          nullable: true
+          title: Sarlavha
+          maxLength: 150
+        description:
+          type: string
+          nullable: true
+        question_type:
+          enum:
+          - MCQ
+          - MCMA
+          - SA
+          - SC
+          - SUC
+          - NC
+          - FCC
+          - TC
+          - TFNG
+          - YNNG
+          - MH
+          - MI
+          - MF
+          - FC
+          - ML
+          - DL
+          - ''
+          - null
+          type: string
+          x-spec-enum-id: a16df57d158758ff
+          nullable: true
+          title: Savol turi
+          description: |-
+            The type of question this test head represents.
+
+            * `MCQ` - Multiple Choice
+            * `MCMA` - Multiple Choice (Multiple Answers)
+            * `SA` - Short Answer Questions
+            * `SC` - Sentence Completion
+            * `SUC` - Summary Completion
+            * `NC` - Note Completion
+            * `FCC` - Flow Chart Completion
+            * `TC` - Table Completion
+            * `TFNG` - True/False/Not Given
+            * `YNNG` - Yes/No/Not Given
+            * `MH` - Matching Headings
+            * `MI` - Matching Information
+            * `MF` - Matching Features
+            * `FC` - Form Completion
+            * `ML` - Map Labelling
+            * `DL` - Diagram Labelling
+        question_range:
+          type: string
+          description: Get question number range (e.g., '1-5').
+          readOnly: true
+        matching_options:
+          type: array
+          items: {}
+          description: Get matching options for matching question types.
+          readOnly: true
+        allow_duplicates:
+          type: boolean
+          description: Check if matching allows duplicate selections.
+          readOnly: true
+        select_count:
+          type: string
+          nullable: true
+          description: Get answer format for MCMA.
+          readOnly: true
+        picture:
+          type: string
+          format: uri
+          nullable: true
+          title: Rasm
+        picture_url:
+          type: string
+          nullable: true
+          description: Get full URL for picture.
+          readOnly: true
+        view_type:
+          type: string
+          description: Determine view type for rendering.
+          readOnly: true
+        answer_format:
+          type: string
+          nullable: true
+          description: Get answer format instructions.
+          readOnly: true
+        question_data_parsed:
+          type: object
+          additionalProperties: {}
+          description: Parse question_data JSON.
+          readOnly: true
+        example:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          description: Parse example JSON.
+          readOnly: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          readOnly: true
+      required:
+      - allow_duplicates
+      - answer_format
+      - example
+      - id
+      - matching_options
+      - picture_url
+      - question_data_parsed
+      - question_range
+      - questions
+      - select_count
+      - view_type
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TopSubmission:
+      type: object
+      description: Top submission info.
+      properties:
+        student_name:
+          type: string
+        band_score:
+          type: number
+          format: double
+        submitted_at:
+          type: string
+          format: date-time
+      required:
+      - band_score
+      - student_name
+      - submitted_at
+    UpdateNotesInputRequest:
+      type: object
+      description: Input for updating student notes.
+      properties:
+        notes:
+          type: string
+          description: Teacher notes about the student
+      required:
+      - notes
+    UserBasic:
+      type: object
+      description: Basic user information for nested serialization.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        name:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        profile_image:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+      required:
+      - email
+      - full_name
+      - id
+      - name
+      - profile_image
+      - username
+    UserOutput:
+      type: object
+      description: Serializer for user output.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        role:
+          enum:
+          - SUPERADMIN
+          - MANAGER
+          - TEACHER
+          - STUDENT
+          type: string
+          description: |-
+            * `SUPERADMIN` - Super Admin
+            * `MANAGER` - Manager
+            * `TEACHER` - Teacher
+            * `STUDENT` - Student
+          x-spec-enum-id: 6dbfce5ceb21e4b9
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+          nullable: true
+        date_of_birth:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        profile_image:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        profile_image_url:
+          type: string
+          nullable: true
+          description: |-
+            Get full URL for profile image.
+
+            S3 URLs are already absolute, local URLs need request context.
+          readOnly: true
+        is_verified:
+          type: boolean
+          readOnly: true
+        google_id:
+          type: string
+          readOnly: true
+          nullable: true
+        registration_method:
+          enum:
+          - EMAIL
+          - TELEGRAM
+          - GOOGLE
+          type: string
+          description: |-
+            * `EMAIL` - Email/Password
+            * `TELEGRAM` - Telegram
+            * `GOOGLE` - Google
+          x-spec-enum-id: d2923b1430b0954f
+          readOnly: true
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        target_score:
+          enum:
+          - '5.5'
+          - '6.0'
+          - '6.5'
+          - '7.0'
+          - '7.5'
+          - '8.0'
+          - '8.5'
+          - '9.0'
+          - null
+          type: string
+          description: |-
+            * `5.5` - Band 5.5
+            * `6.0` - Band 6.0
+            * `6.5` - Band 6.5
+            * `7.0` - Band 7.0
+            * `7.5` - Band 7.5
+            * `8.0` - Band 8.0
+            * `8.5` - Band 8.5
+            * `9.0` - Band 9.0
+          x-spec-enum-id: 5f1c2d9f824a8378
+          readOnly: true
+          nullable: true
+        exam_type:
+          enum:
+          - ACADEMIC
+          - GENERAL
+          - UKVI
+          - null
+          type: string
+          description: |-
+            * `ACADEMIC` - Academic
+            * `GENERAL` - General Training
+            * `UKVI` - UKVI (UK Visas and Immigration)
+          x-spec-enum-id: c43aedef46b6a6a5
+          readOnly: true
+          nullable: true
+        exam_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        heard_from:
+          enum:
+          - GOOGLE
+          - SOCIAL_MEDIA
+          - FRIEND
+          - YOUTUBE
+          - TELEGRAM
+          - OTHER
+          - null
+          type: string
+          description: |-
+            * `GOOGLE` - Google Search
+            * `SOCIAL_MEDIA` - Social Media
+            * `FRIEND` - Friend or Family
+            * `YOUTUBE` - YouTube
+            * `TELEGRAM` - Telegram
+            * `OTHER` - Other
+          x-spec-enum-id: 29d296101e83edbd
+          readOnly: true
+          nullable: true
+        main_goal:
+          enum:
+          - STUDY_ABROAD
+          - IMMIGRATION
+          - WORK
+          - PERSONAL
+          - OTHER
+          - null
+          type: string
+          description: |-
+            * `STUDY_ABROAD` - Study Abroad
+            * `IMMIGRATION` - Immigration
+            * `WORK` - Work or Career
+            * `PERSONAL` - Personal Development
+            * `OTHER` - Other
+          x-spec-enum-id: 0db2b42f7ddddf90
+          readOnly: true
+          nullable: true
+        onboarding_completed:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - balance
+      - created_at
+      - date_of_birth
+      - email
+      - exam_date
+      - exam_type
+      - first_name
+      - google_id
+      - heard_from
+      - id
+      - is_verified
+      - last_name
+      - main_goal
+      - onboarding_completed
+      - phone
+      - profile_image
+      - profile_image_url
+      - registration_method
+      - role
+      - target_score
+      - username
+    UserStatsResponse:
+      type: object
+      description: Response serializer for user stats endpoint.
+      properties:
+        overall:
+          $ref: '#/components/schemas/OverallStats'
+        by_section:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SectionStatsDetail'
+      required:
+      - by_section
+      - overall
+    UserStatus:
+      type: object
+      description: User status for item.
+      properties:
+        completed:
+          type: boolean
+        score:
+          type: number
+          format: double
+          nullable: true
+        attempt_count:
+          type: integer
+        is_accessible:
+          type: boolean
+      required:
+      - attempt_count
+      - completed
+      - is_accessible
+      - score
+    VerificationCodeInputRequest:
+      type: object
+      description: Serializer for verification code input.
+      properties:
+        code:
+          type: string
+          minLength: 4
+          maxLength: 6
+      required:
+      - code
+    WritingCheckRequestRequest:
+      type: object
+      description: Serializer for standalone writing check API request.
+      properties:
+        essay:
+          type: string
+          minLength: 1
+          description: The essay text to check
+          maxLength: 10000
+        task_type:
+          enum:
+          - Task 1
+          - Task 2
+          type: string
+          x-spec-enum-id: 800e5a2ce06f5474
+          default: Task 2
+          description: |-
+            IELTS Writing task type
+
+            * `Task 1` - Task 1
+            * `Task 2` - Task 2
+      required:
+      - essay
+    WritingCheckResponse:
+      type: object
+      description: Serializer for writing check API response.
+      properties:
+        status:
+          enum:
+          - processing
+          - completed
+          - failed
+          type: string
+          description: |-
+            * `processing` - processing
+            * `completed` - completed
+            * `failed` - failed
+          x-spec-enum-id: 37b38d1036061dfa
+        writing_attempt_id:
+          type: string
+        inline:
+          type: string
+        sentences:
+          type: array
+          items: {}
+        summary:
+          type: string
+        band_score:
+          type: string
+        corrected_essay:
+          type: string
+        message:
+          type: string
+      required:
+      - status
+    WritingSubmissionRequest:
+      type: object
+      description: Serializer for writing task submissions.
+      properties:
+        task_id:
+          type: integer
+          description: ID of the writing task
+        answer_text:
+          type: string
+          minLength: 1
+          description: User's essay text
+      required:
+      - answer_text
+      - task_id
+    WritingTask:
+      type: object
+      description: Serializer for writing tasks.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        task_type:
+          enum:
+          - TASK_1
+          - TASK_2
+          type: string
+          description: |-
+            * `TASK_1` - Task 1
+            * `TASK_2` - Task 2
+          x-spec-enum-id: 5814727013a801db
+        task_type_display:
+          type: string
+          readOnly: true
+        chart_type:
+          enum:
+          - LINE_GRAPH
+          - BAR_CHART
+          - PIE_CHART
+          - TABLE
+          - MAP
+          - PROCESS
+          - FLOW_CHART
+          - MIXED
+          - OTHER
+          - ''
+          - null
+          type: string
+          x-spec-enum-id: 6c025fd9f6673a58
+          nullable: true
+          description: |-
+            Type of visual for Task 1 (Academic). Leave empty for Task 2.
+
+            * `LINE_GRAPH` - Line Graph
+            * `BAR_CHART` - Bar Chart
+            * `PIE_CHART` - Pie Chart
+            * `TABLE` - Table
+            * `MAP` - Map
+            * `PROCESS` - Process Diagram
+            * `FLOW_CHART` - Flow Chart
+            * `MIXED` - Mixed/Multiple Charts
+            * `OTHER` - Other
+        chart_type_display:
+          type: string
+          readOnly: true
+          nullable: true
+        prompt:
+          type: string
+          description: The full text of the task prompt.
+        picture:
+          type: string
+          format: uri
+          nullable: true
+          title: Task Picture
+        picture_url:
+          type: string
+          nullable: true
+          description: Get full URL for picture.
+          readOnly: true
+        data:
+          nullable: true
+          description: For Task 1, stores graph/chart data.
+        min_words:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Minimum word count (150 for Task 1, 250 for Task 2)
+        user_attempt:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          description: Get user's writing attempt for this task.
+          readOnly: true
+      required:
+      - chart_type_display
+      - id
+      - picture_url
+      - prompt
+      - task_type
+      - task_type_display
+      - user_attempt
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

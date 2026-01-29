@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -57,6 +58,16 @@ const icons = {
       <path d="m6 9 6 6 6-6" />
     </svg>
   ),
+  classroom: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      <path d="M6 8h2" />
+      <path d="M6 12h2" />
+      <path d="M16 8h2" />
+      <path d="M16 12h2" />
+    </svg>
+  ),
 };
 
 interface User {
@@ -82,6 +93,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
+  const pathname = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -236,7 +248,7 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
             </div>
           </div>
 
-          {/* Right Section - Theme Toggle, Notifications & Profile */}
+          {/* Right Section - Teacher Room, Theme Toggle, Notifications & Profile */}
           <div className="flex items-center gap-2">
             {/* Mobile Search Button */}
             <motion.button
@@ -246,6 +258,23 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
             >
               <icons.search className="w-5 h-5" />
             </motion.button>
+
+            {/* Teacher Room Button */}
+            <Link href="/teacher/classroom">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  'hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all',
+                  pathname?.startsWith('/teacher')
+                    ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
+                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                )}
+              >
+                <icons.classroom className="w-4 h-4" />
+                <span>Teacher Room</span>
+              </motion.button>
+            </Link>
 
             {/* Theme Toggle */}
             <ThemeToggle size="sm" />
