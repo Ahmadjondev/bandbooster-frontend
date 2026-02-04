@@ -186,7 +186,7 @@ export default function RegisterPage() {
                             Create an Account
                         </h1>
                         <p className="text-neutral-600 dark:text-neutral-400">
-                            Join thousands of successful IELTS achievers
+                            Start your IELTS preparation journey today
                         </p>
                     </motion.div>
 

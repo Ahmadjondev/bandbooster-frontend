@@ -626,10 +626,11 @@ export default function HomePage() {
             </p>
 
             {/* Stats */}
-            <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
               {[
                 { value: "AI", label: "Powered Feedback", sublabel: "Instant & accurate" },
                 { value: "24/7", label: "Availability", sublabel: "Practice anytime" },
+                { value: "4", label: "IELTS Modules", sublabel: "Complete coverage" },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -686,7 +687,7 @@ export default function HomePage() {
                   Ready to Boost Your Band Score?
                 </h2>
                 <p className="text-lg md:text-xl text-white/80 mb-10 max-w-xl mx-auto">
-                  Join thousands of students achieving their dream scores. Start your free practice today.
+                  Start your IELTS preparation journey with AI-powered practice and instant feedback.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">

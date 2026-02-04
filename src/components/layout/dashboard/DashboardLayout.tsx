@@ -102,7 +102,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       }
       // Only auto-collapse on small screens if user hasn't set a preference
       const storedPreference = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-      if (window.innerWidth < 1280 && storedPreference === null) {
+      if (window.innerWidth < 1080 && storedPreference === null) {
         setIsSidebarCollapsed(true);
       }
     };

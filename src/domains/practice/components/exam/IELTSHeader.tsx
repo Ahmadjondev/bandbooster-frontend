@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { PracticeTimer } from './PracticeTimer';
 import { PracticeThemeToggle } from './PracticeThemeToggle';
@@ -37,6 +37,21 @@ const CheckIcon = () => (
     </svg>
 );
 
+const WarningIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+        <path d="M12 9v4" />
+        <path d="M12 17h.01" />
+    </svg>
+);
+
+const CloseIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+    </svg>
+);
+
 export interface IELTSHeaderProps {
     testTakerId?: string;
     onBack?: () => void;
@@ -58,6 +73,10 @@ export interface IELTSHeaderProps {
     onSubmit?: () => void;
     /** Show submit button */
     showSubmit?: boolean;
+    /** Whether user has any answers - used for submit validation */
+    hasAnswers?: boolean;
+    /** Additional content to render on the right side (before theme toggle) */
+    rightContent?: ReactNode;
 }
 
 export function IELTSHeader({
@@ -71,9 +90,12 @@ export function IELTSHeader({
     showThemeToggle = true,
     onSubmit,
     showSubmit = true,
+    hasAnswers = false,
+    rightContent,
 }: IELTSHeaderProps) {
     const router = useRouter();
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showWarning, setShowWarning] = useState(false);
 
     // Track fullscreen state changes
     useEffect(() => {
@@ -134,7 +156,7 @@ export function IELTSHeader({
     }, []);
 
     return (
-        <header className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-50">
+        <header className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-[999]">
             {/* Left Section */}
             <div className="flex items-center gap-4">
                 {/* Back Button */}
@@ -166,6 +188,9 @@ export function IELTSHeader({
 
             {/* Right Section */}
             <div className="flex items-center gap-2">
+                {/* Custom Right Content (e.g., Highlight Toolbar) */}
+                {rightContent}
+
                 {/* Theme Toggle */}
                 {showThemeToggle && onThemeToggle && (
                     <PracticeThemeToggle
@@ -185,14 +210,50 @@ export function IELTSHeader({
 
                 {/* Submit Button */}
                 {showSubmit && onSubmit && (
-                    <button
-                        onClick={onSubmit}
-                        aria-label="Submit answers"
-                        className="h-9 px-4 flex items-center gap-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors shadow-sm"
-                    >
-                        <CheckIcon />
-                        <span>Submit</span>
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => {
+                                if (hasAnswers) {
+                                    onSubmit();
+                                } else {
+                                    setShowWarning(true);
+                                }
+                            }}
+                            aria-label="Submit answers"
+                            className={cn(
+                                "h-9 px-4 flex items-center gap-1.5 rounded-lg text-white text-sm font-medium transition-colors shadow-sm",
+                                hasAnswers
+                                    ? "bg-green-600 hover:bg-green-700"
+                                    : "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+                            )}
+                        >
+                            <CheckIcon />
+                            <span>Submit</span>
+                        </button>
+
+                        {/* Warning Tooltip */}
+                        {showWarning && !hasAnswers && (
+                            <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-amber-200 dark:border-amber-700 z-50 overflow-hidden">
+                                <div className="bg-amber-50 dark:bg-amber-900/30 px-4 py-3 border-b border-amber-200 dark:border-amber-700 flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                                        <WarningIcon />
+                                        <span className="font-semibold text-sm">Cannot Submit</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowWarning(false)}
+                                        className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
+                                    >
+                                        <CloseIcon />
+                                    </button>
+                                </div>
+                                <div className="px-4 py-3">
+                                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                                        Please answer at least one question before submitting your test.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         </header>

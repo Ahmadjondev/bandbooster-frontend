@@ -2,12 +2,14 @@
  * Reading Passage Component
  * Displays the reading passage text in a scrollable panel
  * IELTS-authentic styling with proper typography for academic reading
+ * Supports CD-IELTS style text highlighting
  */
 
 'use client';
 
 import { forwardRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { HighlightableContent, useOptionalHighlightContext } from './highlight';
 
 export interface ReadingPassageProps {
     /** Passage title */
@@ -20,10 +22,14 @@ export interface ReadingPassageProps {
     wordCount?: number;
     /** Additional className */
     className?: string;
+    /** Whether highlighting is enabled */
+    enableHighlighting?: boolean;
 }
 
 export const ReadingPassage = forwardRef<HTMLDivElement, ReadingPassageProps>(
-    function ReadingPassage({ title, content, passageNumber, wordCount, className }, ref) {
+    function ReadingPassage({ title, content, passageNumber, wordCount, className, enableHighlighting = true }, ref) {
+        const highlightContext = useOptionalHighlightContext();
+
         // Parse content - handle HTML or plain text
         // CRITICAL: Preserve all line breaks exactly as provided from backend
         const formattedContent = useMemo(() => {
@@ -45,6 +51,14 @@ export const ReadingPassage = forwardRef<HTMLDivElement, ReadingPassageProps>(
                 })
                 .join('');
         }, [content]);
+
+        // Generate unique container ID for this passage
+        const containerId = useMemo(() => {
+            return `passage-${passageNumber || 1}`;
+        }, [passageNumber]);
+
+        // Check if highlighting is available
+        const canHighlight = enableHighlighting && highlightContext !== null;
 
         return (
             <div
@@ -76,18 +90,41 @@ export const ReadingPassage = forwardRef<HTMLDivElement, ReadingPassageProps>(
                 </div>
 
                 {/* Passage Content */}
-                <article
-                    className="px-6 py-6 prose prose-gray dark:prose-invert max-w-none
-                        prose-p:text-gray-700 dark:prose-p:text-gray-300
-                        prose-p:leading-relaxed prose-p:text-[15px] prose-p:mb-4
-                        prose-headings:text-gray-900 dark:prose-headings:text-white
-                        prose-headings:font-semibold
-                        prose-h3:text-base prose-h3:mt-6 prose-h3:mb-3
-                        prose-strong:text-gray-900 dark:prose-strong:text-white
-                        prose-em:text-gray-700 dark:prose-em:text-gray-300
-                        selection:bg-blue-100 dark:selection:bg-blue-900/30"
-                    dangerouslySetInnerHTML={{ __html: formattedContent }}
-                />
+                {canHighlight ? (
+                    <article
+                        className="px-6 py-6 prose prose-gray dark:prose-invert max-w-none
+                            prose-p:text-gray-700 dark:prose-p:text-gray-300
+                            prose-p:leading-relaxed prose-p:text-[15px] prose-p:mb-4
+                            prose-headings:text-gray-900 dark:prose-headings:text-white
+                            prose-headings:font-semibold
+                            prose-h3:text-base prose-h3:mt-6 prose-h3:mb-3
+                            prose-strong:text-gray-900 dark:prose-strong:text-white
+                            prose-em:text-gray-700 dark:prose-em:text-gray-300"
+                    >
+                        <HighlightableContent
+                            containerId={containerId}
+                            content={formattedContent}
+                            highlights={highlightContext.getHighlights(containerId)}
+                            activeColor={highlightContext.state.activeColor}
+                            onHighlight={highlightContext.addHighlight}
+                            onRemoveHighlight={highlightContext.removeHighlight}
+                            onColorChange={highlightContext.setActiveColor}
+                        />
+                    </article>
+                ) : (
+                    <article
+                        className="px-6 py-6 prose prose-gray dark:prose-invert max-w-none
+                            prose-p:text-gray-700 dark:prose-p:text-gray-300
+                            prose-p:leading-relaxed prose-p:text-[15px] prose-p:mb-4
+                            prose-headings:text-gray-900 dark:prose-headings:text-white
+                            prose-headings:font-semibold
+                            prose-h3:text-base prose-h3:mt-6 prose-h3:mb-3
+                            prose-strong:text-gray-900 dark:prose-strong:text-white
+                            prose-em:text-gray-700 dark:prose-em:text-gray-300
+                            selection:bg-blue-100 dark:selection:bg-blue-900/30"
+                        dangerouslySetInnerHTML={{ __html: formattedContent }}
+                    />
+                )}
             </div>
         );
     }

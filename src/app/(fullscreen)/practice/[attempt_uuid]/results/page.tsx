@@ -191,7 +191,7 @@ interface ScoreDisplayProps {
 }
 
 function ScoreDisplay({ showBandScore, bandScore, correctAnswers, totalQuestions, accuracy }: ScoreDisplayProps) {
-    if (showBandScore) {
+    if (showBandScore && bandScore != null) {
         return (
             <div className="text-center">
                 <div className="text-6xl font-bold text-neutral-900 dark:text-white tracking-tight">
@@ -238,11 +238,13 @@ export default function PracticeResultsPage() {
     const [isDarkMode, setIsDarkMode] = useState(false);
 
     // Initialize dark mode
+    // Use same key as main ThemeProvider for consistency
     useEffect(() => {
-        const savedTheme = localStorage.getItem('practice-theme');
-        if (savedTheme) {
+        const savedTheme = localStorage.getItem('bandbooster-theme');
+        if (savedTheme === 'dark' || savedTheme === 'light') {
             setIsDarkMode(savedTheme === 'dark');
         } else {
+            // For 'system' or no value, check system preference
             setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
         }
     }, []);
@@ -383,7 +385,7 @@ export default function PracticeResultsPage() {
                         <div className="shrink-0">
                             <ScoreDisplay
                                 showBandScore={shouldShowBandScore}
-                                bandScore={bandScore}
+                                bandScore={result.score}
                                 correctAnswers={result.correct_answers}
                                 totalQuestions={result.total_questions}
                                 accuracy={result.accuracy}

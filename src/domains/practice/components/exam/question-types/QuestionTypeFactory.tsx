@@ -75,7 +75,7 @@ interface DLQuestionData {
   visual_description?: string;
   label_count?: number;
   labelCount?: number; // alternate naming  
-  labels?: Array<{ name: string; correctAnswer?: string; correct_answer?: string }>;
+  labels?: Array<{ name: string; text?: string; correctAnswer?: string; correct_answer?: string }>;
   note?: string;
 }
 
@@ -166,6 +166,17 @@ export interface QuestionTypeFactoryProps {
 // ============= Helper Functions =============
 
 /**
+ * Calculate max selections for MCMA questions from correct_answer
+ * The correct_answer for MCMA is a string like "ACE" (3 selections) or "BD" (2 selections)
+ */
+function calculateMaxSelections(correctAnswer?: string): number | undefined {
+  if (!correctAnswer || typeof correctAnswer !== 'string') return undefined;
+  // Count the number of uppercase letters in the correct answer (e.g., "ACE" = 3)
+  const letters = correctAnswer.match(/[A-Z]/g);
+  return letters ? letters.length : undefined;
+}
+
+/**
  * Transform API question to component-specific format
  * Handles both 'choices' (API standard) and 'options' (legacy) formats
  */
@@ -186,17 +197,24 @@ function transformQuestion(q: APIQuestion) {
     }));
   }
 
+  // Calculate maxSelections: prefer explicit max_selections, fallback to correct_answer length
+  let maxSelections: number | undefined;
+  if (q.max_selections) {
+    maxSelections = typeof q.max_selections === 'string'
+      ? parseInt(q.max_selections)
+      : q.max_selections;
+  } else if (q.correct_answer) {
+    // For MCMA questions, derive maxSelections from correct_answer length
+    maxSelections = calculateMaxSelections(q.correct_answer);
+  }
+
   return {
     id: q.id,
     order: q.order,
     text: q.question_text || q.text || '',
     questionText: q.question_text || q.text || '',
     choices,
-    maxSelections: q.max_selections
-      ? typeof q.max_selections === 'string'
-        ? parseInt(q.max_selections)
-        : q.max_selections
-      : undefined,
+    maxSelections,
   };
 }
 
@@ -246,6 +264,7 @@ export const QuestionTypeFactory = memo(function QuestionTypeFactory({
           {...commonProps}
           questions={questions}
           onAnswer={(id, answers) => onAnswer(id, answers)}
+          defaultMaxSelections={group.select_count ?? undefined}
         />
       );
 
@@ -459,6 +478,7 @@ export const QuestionTypeFactory = memo(function QuestionTypeFactory({
             labelCount: dlData.label_count || dlData.labelCount || questions.length,
             labels: (dlData.labels || []).map(l => ({
               name: l.name,
+              text: l.text || l.name || '',
               correctAnswer: l.correctAnswer || l.correct_answer || '',
             })),
             note: dlData.note,

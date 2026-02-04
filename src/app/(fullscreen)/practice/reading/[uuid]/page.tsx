@@ -2,7 +2,7 @@
  * IELTS Reading Practice Page
  * Split-panel layout: Left panel for passage, Right panel for questions
  * No audio controls - reading specific behavior
- * Features: Timer, Theme Toggle, Question Highlighting, API Submission
+ * Features: Timer, Theme Toggle, Question Highlighting, Text Highlighting, API Submission
  */
 
 'use client';
@@ -15,7 +15,8 @@ import { ReadingSplitter } from '@/domains/practice/components/exam/ReadingSplit
 import { BottomNav, type SectionInfo as ReadingPassageInfo, type QuestionInfo } from '@/domains/practice/components/exam/BottomNav';
 import { NavigationControls } from '@/domains/practice/components/exam/NavigationControls';
 import { QuestionTypeFactory, type APITestHead } from '@/domains/practice/components/exam/question-types';
-import { cn } from '@/lib/utils';
+import { HighlightProvider, HighlightToolbar, HighlightableQuestions, useHighlightContext } from '@/domains/practice/components/exam/highlight';
+import { cn, scrollToQuestionInContainer } from '@/lib/utils';
 
 // Types matching API response
 interface APIReadingContent {
@@ -138,11 +139,13 @@ export default function ReadingPracticePage() {
     const [leftPanelWidthPercent, setLeftPanelWidthPercent] = useState(50);
 
     // Initialize dark mode from localStorage or system preference
+    // Use same key as main ThemeProvider for consistency
     useEffect(() => {
-        const savedTheme = localStorage.getItem('practice-theme');
-        if (savedTheme) {
+        const savedTheme = localStorage.getItem('bandbooster-theme');
+        if (savedTheme === 'dark' || savedTheme === 'light') {
             setIsDarkMode(savedTheme === 'dark');
         } else {
+            // For 'system' or no value, check system preference
             setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
         }
     }, []);
@@ -154,7 +157,8 @@ export default function ReadingPracticePage() {
         } else {
             document.documentElement.classList.remove('dark');
         }
-        localStorage.setItem('practice-theme', isDarkMode ? 'dark' : 'light');
+        // Sync with main theme provider key
+        localStorage.setItem('bandbooster-theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     // Fetch practice detail
@@ -195,16 +199,58 @@ export default function ReadingPracticePage() {
         return sortedContents.find(c => c.passage_number === activePassage) || sortedContents[0];
     }, [sortedContents, activePassage]);
 
+    // Check if user has any answers (for submit validation)
+    const hasAnswers = useMemo(() => {
+        return Object.values(userAnswers).some(answer => {
+            if (Array.isArray(answer)) {
+                return answer.length > 0 && answer.some(a => a && String(a).trim() !== '');
+            }
+            return answer !== undefined && answer !== null && String(answer).trim() !== '';
+        });
+    }, [userAnswers]);
+
     // Build passages info for bottom nav
     const passagesInfo: ReadingPassageInfo[] = useMemo(() => {
         return sortedContents.map(content => {
             const questions: QuestionInfo[] = [];
             content.test_heads.forEach(head => {
+                const isMCMA = head.question_type === 'MCMA';
                 head.questions.forEach(q => {
                     const answer = userAnswers[q.id];
-                    const isAnswered = answer !== undefined &&
-                        (Array.isArray(answer) ? answer.length > 0 : String(answer).trim() !== '');
-                    questions.push({ id: q.id, order: q.order, isAnswered });
+
+                    if (isMCMA) {
+                        // For MCMA, expand single question into multiple based on maxSelections
+                        // Priority: q.max_selections > correct_answer length > head.select_count > 1
+                        let maxSelections = 1;
+                        if (q.max_selections) {
+                            maxSelections = typeof q.max_selections === 'string'
+                                ? parseInt(q.max_selections) || 1
+                                : q.max_selections;
+                        } else if (q.correct_answer && typeof q.correct_answer === 'string') {
+                            const letters = q.correct_answer.match(/[A-Z]/g);
+                            maxSelections = letters ? letters.length : 1;
+                        } else if (head.select_count) {
+                            maxSelections = head.select_count;
+                        }
+
+                        // Create entries for each question number (order, order+1, etc.)
+                        const selectedAnswers = Array.isArray(answer) ? answer : [];
+                        for (let i = 0; i < maxSelections; i++) {
+                            const isAnswered = selectedAnswers.length > i &&
+                                selectedAnswers[i] !== undefined &&
+                                String(selectedAnswers[i]).trim() !== '';
+                            questions.push({
+                                id: q.id,
+                                order: q.order + i,
+                                isAnswered
+                            });
+                        }
+                    } else {
+                        // Regular question - single entry
+                        const isAnswered = answer !== undefined &&
+                            (Array.isArray(answer) ? answer.length > 0 : String(answer).trim() !== '');
+                        questions.push({ id: q.id, order: q.order, isAnswered });
+                    }
                 });
             });
             return { sectionNumber: content.passage_number, title: content.title, questions };
@@ -216,8 +262,28 @@ export default function ReadingPracticePage() {
         const questions: { id: number; order: number; passageNumber: number }[] = [];
         sortedContents.forEach(content => {
             content.test_heads.forEach(head => {
+                const isMCMA = head.question_type === 'MCMA';
                 head.questions.forEach(q => {
-                    questions.push({ id: q.id, order: q.order, passageNumber: content.passage_number });
+                    if (isMCMA) {
+                        // For MCMA, expand based on maxSelections
+                        let maxSelections = 1;
+                        if (q.max_selections) {
+                            maxSelections = typeof q.max_selections === 'string'
+                                ? parseInt(q.max_selections) || 1
+                                : q.max_selections;
+                        } else if (q.correct_answer && typeof q.correct_answer === 'string') {
+                            const letters = q.correct_answer.match(/[A-Z]/g);
+                            maxSelections = letters ? letters.length : 1;
+                        } else if (head.select_count) {
+                            maxSelections = head.select_count;
+                        }
+
+                        for (let i = 0; i < maxSelections; i++) {
+                            questions.push({ id: q.id, order: q.order + i, passageNumber: content.passage_number });
+                        }
+                    } else {
+                        questions.push({ id: q.id, order: q.order, passageNumber: content.passage_number });
+                    }
                 });
             });
         });
@@ -254,12 +320,12 @@ export default function ReadingPracticePage() {
         setTimeout(() => setHighlightedQuestionId(null), HIGHLIGHT_DURATION);
     }, []);
 
-    // Scroll to question element
+    // Scroll to question element within the questions container
     const scrollToQuestion = useCallback((questionId: number) => {
-        const element = questionsContainerRef.current?.querySelector(`[data-question-id="${questionId}"]`);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        scrollToQuestionInContainer(questionsContainerRef, questionId, {
+            behavior: 'smooth',
+            block: 'center',
+        });
     }, []);
 
     // Handlers
@@ -361,6 +427,19 @@ export default function ReadingPracticePage() {
     const submitAnswers = useCallback(async () => {
         if (isSubmitting || !rawData) return;
 
+        // Validate at least one answer exists
+        const hasAnswers = Object.values(userAnswers).some(answer => {
+            if (Array.isArray(answer)) {
+                return answer.length > 0 && answer.some(a => a && String(a).trim() !== '');
+            }
+            return answer !== undefined && answer !== null && String(answer).trim() !== '';
+        });
+
+        if (!hasAnswers) {
+            setError('Please answer at least one question before submitting.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
@@ -448,6 +527,109 @@ export default function ReadingPracticePage() {
     }
 
     return (
+        <HighlightProvider options={{ sessionKey: practiceUuid }}>
+            <ReadingPracticeContent
+                rawData={rawData}
+                practiceUuid={practiceUuid}
+                isDarkMode={isDarkMode}
+                isSubmitting={isSubmitting}
+                userAnswers={userAnswers}
+                activePassage={activePassage}
+                activeQuestionIndex={activeQuestionIndex}
+                leftPanelWidthPercent={leftPanelWidthPercent}
+                highlightedQuestionId={highlightedQuestionId}
+                hasAnswers={hasAnswers}
+                sortedContents={sortedContents}
+                activeContent={activeContent}
+                passagesInfo={passagesInfo}
+                allQuestions={allQuestions}
+                currentQuestionIndex={currentQuestionIndex}
+                activeQuestionId={activeQuestionId}
+                questionsContainerRef={questionsContainerRef}
+                passageContainerRef={passageContainerRef}
+                mainContainerRef={mainContainerRef}
+                onBack={handleBack}
+                onAnswer={handleAnswer}
+                onPassageChange={handlePassageChange}
+                onQuestionClick={handleQuestionClick}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                onTimeUp={handleTimeUp}
+                onTimerStart={handleTimerStart}
+                onThemeToggle={handleThemeToggle}
+                onSubmit={handleSubmit}
+                setLeftPanelWidthPercent={setLeftPanelWidthPercent}
+            />
+        </HighlightProvider>
+    );
+}
+
+// Extracted content component to use highlight context
+interface ReadingPracticeContentProps {
+    rawData: APIPracticeDetail;
+    practiceUuid: string;
+    isDarkMode: boolean;
+    isSubmitting: boolean;
+    userAnswers: Record<number, string | string[]>;
+    activePassage: number;
+    activeQuestionIndex: number;
+    leftPanelWidthPercent: number;
+    highlightedQuestionId: number | null;
+    hasAnswers: boolean;
+    sortedContents: APIReadingContent[];
+    activeContent: APIReadingContent | undefined;
+    passagesInfo: ReadingPassageInfo[];
+    allQuestions: { id: number; order: number; passageNumber: number }[];
+    currentQuestionIndex: number;
+    activeQuestionId: number | null;
+    questionsContainerRef: React.RefObject<HTMLDivElement | null>;
+    passageContainerRef: React.RefObject<HTMLDivElement | null>;
+    mainContainerRef: React.RefObject<HTMLDivElement | null>;
+    onBack: () => void;
+    onAnswer: (questionId: number, answer: string | string[]) => void;
+    onPassageChange: (passageNumber: number) => void;
+    onQuestionClick: (questionId: number) => void;
+    onPrev: () => void;
+    onNext: () => void;
+    onTimeUp: () => void;
+    onTimerStart: (startTime: Date) => void;
+    onThemeToggle: (isDark: boolean) => void;
+    onSubmit: () => void;
+    setLeftPanelWidthPercent: (percent: number) => void;
+}
+
+function ReadingPracticeContent({
+    rawData,
+    isDarkMode,
+    isSubmitting,
+    userAnswers,
+    activePassage,
+    leftPanelWidthPercent,
+    highlightedQuestionId,
+    hasAnswers,
+    activeContent,
+    passagesInfo,
+    allQuestions,
+    currentQuestionIndex,
+    activeQuestionId,
+    questionsContainerRef,
+    passageContainerRef,
+    mainContainerRef,
+    onBack,
+    onAnswer,
+    onPassageChange,
+    onQuestionClick,
+    onPrev,
+    onNext,
+    onTimeUp,
+    onTimerStart,
+    onThemeToggle,
+    onSubmit,
+    setLeftPanelWidthPercent,
+}: ReadingPracticeContentProps) {
+    const { state, setActiveColor, clearAllHighlights } = useHighlightContext();
+
+    return (
         <div className={cn('min-h-screen bg-white dark:bg-slate-900 flex flex-col', isDarkMode ? 'dark' : '')}>
             {/* Submitting Overlay */}
             {isSubmitting && <SubmittingOverlay />}
@@ -472,16 +654,26 @@ export default function ReadingPracticePage() {
 
             {/* Header - Fixed at top with timer, theme toggle, and submit button */}
             <IELTSHeader
-                onBack={handleBack}
+                onBack={onBack}
                 timerMinutes={rawData.duration || 60}
-                onTimeUp={handleTimeUp}
-                onTimerStart={handleTimerStart}
+                onTimeUp={onTimeUp}
+                onTimerStart={onTimerStart}
                 isDarkMode={isDarkMode}
-                onThemeToggle={handleThemeToggle}
+                onThemeToggle={onThemeToggle}
                 showTimer={true}
                 showThemeToggle={true}
-                onSubmit={handleSubmit}
+                onSubmit={onSubmit}
                 showSubmit={true}
+                hasAnswers={hasAnswers}
+            // rightContent={
+            //     <HighlightToolbar
+            //         activeColor={state.activeColor}
+            //         onColorChange={setActiveColor}
+            //         onClearAll={clearAllHighlights}
+            //         compact
+            //         className="mr-2"
+            //     />
+            // }
             />
 
             {/* Main Content - Split Panel Layout with Independent Scrolling */}
@@ -502,6 +694,7 @@ export default function ReadingPracticePage() {
                         passageNumber={activeContent?.passage_number}
                         wordCount={activeContent?.word_count}
                         className="h-full overflow-y-auto"
+                        enableHighlighting={true}
                     />
                 </div>
 
@@ -518,18 +711,12 @@ export default function ReadingPracticePage() {
                     className="h-full overflow-y-auto bg-gray-50 dark:bg-slate-800/50"
                     style={{ width: `${100 - leftPanelWidthPercent}%` }}
                 >
-                    {/* Questions Header */}
-                    <div className="sticky top-0 bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 z-10">
-                        <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                            Questions
-                        </h2>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Read the passage and answer the questions below.
-                        </p>
-                    </div>
-
-                    {/* Questions Content */}
-                    <div className="px-6 py-6 space-y-10">
+                    {/* Questions Content with Highlighting */}
+                    <HighlightableQuestions
+                        groupId={`reading-questions-${activeContent?.passage_number || 1}`}
+                        className="px-6 py-6 space-y-10"
+                        enabled={true}
+                    >
                         {activeContent?.test_heads.map((group) => (
                             <div
                                 key={group.id}
@@ -538,20 +725,20 @@ export default function ReadingPracticePage() {
                                 <QuestionTypeFactory
                                     group={group}
                                     userAnswers={userAnswers}
-                                    onAnswer={handleAnswer}
+                                    onAnswer={onAnswer}
                                     mode="reading"
                                     highlightedQuestionId={highlightedQuestionId}
                                 />
                             </div>
                         ))}
-                    </div>
+                    </HighlightableQuestions>
                 </div>
             </div>
 
             {/* Navigation Controls - positioned above bottom nav, right-aligned */}
             <NavigationControls
-                onPrev={handlePrev}
-                onNext={handleNext}
+                onPrev={onPrev}
+                onNext={onNext}
                 canGoPrev={currentQuestionIndex > 0}
                 canGoNext={currentQuestionIndex < allQuestions.length - 1}
             />
@@ -561,8 +748,8 @@ export default function ReadingPracticePage() {
                 sections={passagesInfo}
                 activeSection={activePassage}
                 activeQuestionId={activeQuestionId}
-                onSectionChange={handlePassageChange}
-                onQuestionClick={handleQuestionClick}
+                onSectionChange={onPassageChange}
+                onQuestionClick={onQuestionClick}
                 mode="reading"
             />
         </div>

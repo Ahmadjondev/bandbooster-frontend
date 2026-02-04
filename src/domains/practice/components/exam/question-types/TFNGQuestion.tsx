@@ -91,8 +91,6 @@ const RadioOption = memo(function RadioOption({
   questionId,
   name,
 }: RadioOptionProps) {
-  const inputId = `tfng-${questionId}-${option.key}`;
-
   const getSelectedColorClasses = () => {
     switch (option.color) {
       case 'green':
@@ -122,39 +120,51 @@ const RadioOption = memo(function RadioOption({
     }
   };
 
+  // Handle click without causing scroll
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!disabled) {
+      onSelect();
+    }
+  }, [disabled, onSelect]);
+
   return (
-    <label
-      htmlFor={inputId}
+    <button
+      type="button"
+      role="radio"
+      aria-checked={isSelected}
+      onClick={handleClick}
+      disabled={disabled}
       className={cn(
         'flex items-center gap-2.5 px-4 py-2.5',
         'border-2 rounded cursor-pointer',
         'transition-all duration-150',
         'hover:border-neutral-400 dark:hover:border-neutral-500',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1',
         isSelected
           ? getSelectedColorClasses()
           : 'border-neutral-300 dark:border-neutral-600 bg-white dark:bg-slate-800',
         disabled && 'opacity-60 cursor-not-allowed'
       )}
     >
-      <input
-        type="radio"
-        id={inputId}
-        name={name}
-        value={option.key}
-        checked={isSelected}
-        onChange={() => !disabled && onSelect()}
-        disabled={disabled}
+      {/* Custom radio indicator */}
+      <span
         className={cn(
-          'w-4 h-4',
-          'accent-primary-500',
-          'cursor-pointer',
-          disabled && 'cursor-not-allowed'
+          'w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0',
+          'transition-colors duration-150',
+          isSelected
+            ? 'border-current'
+            : 'border-neutral-400 dark:border-neutral-500'
         )}
-      />
+      >
+        {isSelected && (
+          <span className="w-2 h-2 rounded-full bg-current" />
+        )}
+      </span>
       <span className={cn('text-sm font-semibold', getLabelColorClasses())}>
         {option.label}
       </span>
-    </label>
+    </button>
   );
 });
 
@@ -253,9 +263,10 @@ export const TFNGQuestion = memo(function TFNGQuestion({
 
       {/* Instructions */}
       <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500 rounded-r">
-        <p className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}>
-          {description}
-        </p>
+        <p
+          className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </div>
 
       {/* Legend we don't need this right now that's why it's commented out */}

@@ -31,6 +31,8 @@ export interface MCMAProps {
   readonly mode?: ExamMode;
   readonly disabled?: boolean;
   readonly highlightedQuestionId?: number | null;
+  /** Default max selections from group.select_count - used when question doesn't have maxSelections */
+  readonly defaultMaxSelections?: number;
 }
 
 // ============= Icons =============
@@ -129,27 +131,40 @@ const MCMAOption = memo(function MCMAOption({
   fontSize,
 }: MCMAOptionProps) {
   const isDisabledByLimit = !isSelected && !canSelect;
+  const isFullyDisabled = disabled || isDisabledByLimit;
+
+  // Handle click without causing scroll - avoid native input focus behavior
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isFullyDisabled) {
+      onToggle();
+    }
+  }, [isFullyDisabled, onToggle]);
 
   return (
-    <label
+    <div
+      role="checkbox"
+      aria-checked={isSelected}
+      tabIndex={isFullyDisabled ? -1 : 0}
+      onClick={handleClick}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !isFullyDisabled) {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
       className={cn(
         'flex items-start gap-3 p-3',
         'border rounded cursor-pointer',
         'transition-colors duration-150',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1',
         isSelected
           ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500 dark:border-primary-400'
           : 'bg-white dark:bg-slate-800 border-neutral-200 dark:border-neutral-700',
         !isDisabledByLimit && !disabled && 'hover:bg-neutral-50 dark:hover:bg-slate-700/50',
-        (disabled || isDisabledByLimit) && 'opacity-60 cursor-not-allowed'
+        isFullyDisabled && 'opacity-60 cursor-not-allowed'
       )}
     >
-      <input
-        type="checkbox"
-        checked={isSelected}
-        onChange={onToggle}
-        disabled={disabled || isDisabledByLimit}
-        className="sr-only"
-      />
       <CheckboxIndicator isSelected={isSelected} />
       <span className={cn('flex items-start gap-2 flex-1', fontSize)}>
         <OptionLetter letter={option.key} isSelected={isSelected} />
@@ -161,7 +176,7 @@ const MCMAOption = memo(function MCMAOption({
           dangerouslySetInnerHTML={{ __html: option.text }}
         />
       </span>
-    </label>
+    </div>
   );
 });
 
@@ -202,6 +217,8 @@ interface MCMAQuestionItemProps {
   fontSize?: string;
   disabled?: boolean;
   isHighlighted?: boolean;
+  /** Default max selections from parent - used when question doesn't have maxSelections */
+  defaultMaxSelections?: number;
 }
 
 const MCMAQuestionItem = memo(function MCMAQuestionItem({
@@ -212,8 +229,10 @@ const MCMAQuestionItem = memo(function MCMAQuestionItem({
   fontSize,
   disabled,
   isHighlighted,
+  defaultMaxSelections,
 }: MCMAQuestionItemProps) {
-  const maxSelections = question.maxSelections ?? 3;
+  // Priority: question.maxSelections > defaultMaxSelections > fallback to choices count
+  const maxSelections = question.maxSelections ?? defaultMaxSelections ?? question.choices.length;
   const canSelectMore = selectedAnswers.length < maxSelections;
 
   const handleToggle = useCallback((key: string) => {
@@ -287,6 +306,7 @@ export const MCMAQuestion = memo(function MCMAQuestion({
   fontSize = 'text-base',
   disabled = false,
   highlightedQuestionId = null,
+  defaultMaxSelections,
 }: MCMAProps) {
   const handleAnswer = useCallback((questionId: number, answers: string[]) => {
     onAnswer(questionId, answers);
@@ -303,9 +323,10 @@ export const MCMAQuestion = memo(function MCMAQuestion({
 
       {/* Instructions */}
       <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500 rounded-r">
-        <p className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}>
-          {description}
-        </p>
+        <p
+          className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </div>
 
       {/* Questions */}
@@ -324,6 +345,7 @@ export const MCMAQuestion = memo(function MCMAQuestion({
               fontSize={fontSize}
               disabled={disabled}
               isHighlighted={highlightedQuestionId === question.id}
+              defaultMaxSelections={defaultMaxSelections}
             />
           );
         })}

@@ -35,8 +35,8 @@ export interface QuestionChoice {
 }
 
 export interface MatchingOption {
-  readonly value: string;
-  readonly label: string;
+  readonly key: string;
+  readonly text: string;
 }
 
 export interface WordListItem {
@@ -372,6 +372,7 @@ export interface MLData {
 
 export interface DLLabel {
   readonly name: string;
+  readonly text: string;
   readonly correctAnswer: string;
 }
 

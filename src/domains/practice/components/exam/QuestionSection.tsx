@@ -31,8 +31,8 @@ export interface Question {
 }
 
 export interface MatchingOption {
-    value: string;
-    label: string;
+    key: string;
+    text: string;
 }
 
 export interface TestHead {
@@ -295,9 +295,9 @@ export function QuestionSection({ group, userAnswers, onAnswer }: QuestionSectio
     const renderYNNG = (question: Question) => {
         const selectedAnswer = (userAnswers[question.id] as string) || '';
         const options = [
-            { key: 'YES', label: 'Yes' },
-            { key: 'NO', label: 'No' },
-            { key: 'NOT GIVEN', label: 'Not Given' },
+            { key: 'YES', text: 'Yes' },
+            { key: 'NO', text: 'No' },
+            { key: 'NOT GIVEN', text: 'Not Given' },
         ];
 
         return (
@@ -320,7 +320,7 @@ export function QuestionSection({ group, userAnswers, onAnswer }: QuestionSectio
                                     className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                 />
                                 <span className={isSelected ? 'font-medium text-gray-900' : 'text-gray-700'}>
-                                    {option.label}
+                                    {option.text}
                                 </span>
                             </label>
                         );
@@ -346,8 +346,8 @@ export function QuestionSection({ group, userAnswers, onAnswer }: QuestionSectio
                 >
                     <option value=""></option>
                     {options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.value}
+                        <option key={option.key} value={option.key}>
+                            {option.key}
                         </option>
                     ))}
                 </select>
@@ -406,8 +406,8 @@ export function QuestionSection({ group, userAnswers, onAnswer }: QuestionSectio
                     <div className="font-medium text-gray-700 mb-2">Options:</div>
                     <div className="grid grid-cols-1 gap-1">
                         {group.matching_options.map((option) => (
-                            <div key={option.value} className="text-gray-600">
-                                <span className="font-medium">{option.value}.</span> {option.label}
+                            <div key={option.key} className="text-gray-600">
+                                <span className="font-medium">{option.key}.</span> {option.text}
                             </div>
                         ))}
                     </div>

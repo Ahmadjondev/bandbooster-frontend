@@ -1,3 +1,5 @@
 export { practiceKeys } from './practice.keys'
 export { authKeys } from './auth.keys'
 export { classroomKeys } from './classroom.keys'
+export { contestQueryKeys } from './contest.keys'
+export { managerKeys } from './manager.keys'

@@ -257,52 +257,54 @@ export default function LoginPage() {
                             <span className="block mt-2">IELTS Success</span>
                         </h2>
                         <p className="text-xl text-primary-100 max-w-md mx-auto">
-                            Join thousands of students who have achieved their dream scores with our platform
+                            AI-powered practice for all four IELTS modules with instant feedback
                         </p>
                     </motion.div>
 
-                    {/* Stats */}
+                    {/* Features */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="grid grid-cols-3 gap-8 mt-8"
+                        className="grid grid-cols-3 gap-6 mt-8"
                     >
                         {[
-                            { value: '500+', label: 'Questions' },
-                            { value: '50+', label: 'Mock Tests' },
-                            { value: '1K+', label: 'Students' },
-                        ].map((stat, index) => (
+                            { value: 'AI', label: 'Feedback' },
+                            { value: '24/7', label: 'Access' },
+                            { value: '4', label: 'Modules' },
+                        ].map((stat) => (
                             <motion.div
                                 key={stat.label}
-                                className="text-center"
+                                className="text-center p-4 rounded-xl bg-white/10 backdrop-blur-sm"
                                 whileHover={{ scale: 1.05 }}
                             >
-                                <div className="text-4xl font-bold">{stat.value}</div>
-                                <div className="text-primary-200">{stat.label}</div>
+                                <div className="text-3xl font-bold">{stat.value}</div>
+                                <div className="text-primary-200 text-sm">{stat.label}</div>
                             </motion.div>
                         ))}
                     </motion.div>
 
-                    {/* Testimonial */}
+                    {/* Benefits list instead of fake testimonial */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.6 }}
-                        className="mt-12 p-6 bg-white/10 backdrop-blur-sm rounded-2xl max-w-md"
+                        className="mt-12 space-y-3 text-left max-w-sm mx-auto"
                     >
-                        <p className="italic text-primary-100 mb-4">
-                            "BandBooster helped me achieve Band 8.0 in just 3 months of practice. The AI feedback is incredibly helpful!"
-                        </p>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold">
-                                S
+                        {[
+                            'Practice with real IELTS-style questions',
+                            'Get instant AI-powered feedback',
+                            'Track your progress over time',
+                        ].map((benefit, index) => (
+                            <div key={index} className="flex items-center gap-3 text-primary-100">
+                                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span className="text-sm">{benefit}</span>
                             </div>
-                            <div className="text-left">
-                                <div className="font-semibold">Sarah K.</div>
-                                <div className="text-sm text-primary-200">Band 8.0 Achiever</div>
-                            </div>
-                        </div>
+                        ))}
                     </motion.div>
                 </div>
             </div>

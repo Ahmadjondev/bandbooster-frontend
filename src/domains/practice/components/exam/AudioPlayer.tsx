@@ -2,11 +2,12 @@
  * Audio Player Component
  * Custom audio player for listening practices
  * Supports play/pause, seek, volume, and time display
+ * Can work with internal audio element or external ref (controlled mode)
  */
 
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { cn } from '@/lib/utils';
 
 // Icons
@@ -39,11 +40,20 @@ const VolumeMuteIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+export interface AudioPlayerHandle {
+    play: () => Promise<void>;
+    pause: () => void;
+    seek: (time: number) => void;
+    isPlaying: boolean;
+}
+
 export interface AudioPlayerProps {
     /** Audio URL */
     src: string;
     /** Optional part number for identification */
     partNumber?: number;
+    /** Total number of parts (for display) */
+    totalParts?: number;
     /** Callback when audio starts playing */
     onPlay?: () => void;
     /** Callback when audio is paused */
@@ -58,11 +68,14 @@ export interface AudioPlayerProps {
     autoPlay?: boolean;
     /** Additional class name */
     className?: string;
+    /** Whether the player is in compact mode */
+    compact?: boolean;
 }
 
-export function AudioPlayer({
+export const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(function AudioPlayer({
     src,
     partNumber,
+    totalParts,
     onPlay,
     onPause,
     onEnded,
@@ -70,7 +83,8 @@ export function AudioPlayer({
     initialTime = 0,
     autoPlay = false,
     className,
-}: AudioPlayerProps) {
+    compact = false,
+}, ref) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -88,15 +102,16 @@ export function AudioPlayer({
     };
 
     // Play audio
-    const play = useCallback(() => {
+    const play = useCallback(async () => {
         const audio = audioRef.current;
         if (audio) {
-            audio.play().then(() => {
+            try {
+                await audio.play();
                 setIsPlaying(true);
                 onPlay?.();
-            }).catch(error => {
+            } catch (error) {
                 console.error('[AUDIO] Failed to play:', error);
-            });
+            }
         }
     }, [onPlay]);
 
@@ -110,6 +125,22 @@ export function AudioPlayer({
         }
     }, [onPause]);
 
+    // Seek to specific time
+    const seekTo = useCallback((time: number) => {
+        const audio = audioRef.current;
+        if (audio) {
+            audio.currentTime = time;
+        }
+    }, []);
+
+    // Expose methods via ref
+    useImperativeHandle(ref, () => ({
+        play,
+        pause,
+        seek: seekTo,
+        isPlaying,
+    }), [play, pause, seekTo, isPlaying]);
+
     // Toggle play/pause
     const togglePlay = useCallback(() => {
         if (isPlaying) {
@@ -119,7 +150,7 @@ export function AudioPlayer({
         }
     }, [isPlaying, play, pause]);
 
-    // Seek to position
+    // Seek to position via click
     const seek = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
         const audio = audioRef.current;
         if (audio && duration > 0) {
@@ -194,11 +225,20 @@ export function AudioPlayer({
         }
     }, [autoPlay, isLoading, play]);
 
-    // Calculate progress percentage
-    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+    // Reset state when src changes
+    useEffect(() => {
+        setCurrentTime(0);
+        setIsPlaying(false);
+        setIsLoading(true);
+    }, [src]);
 
     return (
-        <div className={cn('bg-linear-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800 rounded-xl p-4  border border-slate-200 dark:border-slate-700', className)}>
+        <div className={cn(
+            'bg-linear-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-750',
+            'rounded-xl border border-slate-200 dark:border-slate-700',
+            compact ? 'p-3' : 'p-4',
+            className
+        )}>
             {/* Hidden Audio Element */}
             <audio
                 ref={audioRef}
@@ -208,87 +248,10 @@ export function AudioPlayer({
                 onEnded={handleEnded}
                 onCanPlay={() => setIsLoading(false)}
                 preload="auto"
+                className='w-full'
+                controls={true}
             />
 
-            <div className="flex items-center gap-4">
-                {/* Play/Pause Button */}
-                <button
-                    onClick={togglePlay}
-                    disabled={isLoading}
-                    className={cn(
-                        'shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all',
-                        isLoading
-                            ? 'bg-slate-300 dark:bg-slate-600 cursor-not-allowed'
-                            : 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl'
-                    )}
-                    title={isPlaying ? 'Pause' : 'Play'}
-                >
-                    {isLoading ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : isPlaying ? (
-                        <PauseIcon className="w-5 h-5" />
-                    ) : (
-                        <PlayIcon className="w-5 h-5 ml-0.5" />
-                    )}
-                </button>
-
-                {/* Progress Bar */}
-                <div className="flex-1 flex flex-col gap-1">
-                    {/* Part Label (if provided) */}
-                    {partNumber && (
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                            Part {partNumber}
-                        </span>
-                    )}
-
-                    {/* Progress Track */}
-                    <div
-                        onClick={seek}
-                        className="relative h-2 bg-slate-300 dark:bg-slate-700 rounded-full cursor-pointer group shadow-inner"
-                    >
-                        {/* Progress Fill */}
-                        <div
-                            className="absolute top-0 left-0 h-full bg-primary-500 rounded-full transition-all"
-                            style={{ width: `${progress}%` }}
-                        />
-                        {/* Scrubber */}
-                        <div
-                            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-primary-500 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                            style={{ left: `calc(${progress}% - 8px)` }}
-                        />
-                    </div>
-
-                    {/* Time Display */}
-                    <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 font-mono">
-                        <span>{formatTime(currentTime)}</span>
-                        <span>{formatTime(duration)}</span>
-                    </div>
-                </div>
-
-                {/* Volume Control */}
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={toggleMute}
-                        className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                        title={isMuted ? 'Unmute' : 'Mute'}
-                    >
-                        {isMuted || volume === 0 ? (
-                            <VolumeMuteIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                        ) : (
-                            <VolumeIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                        )}
-                    </button>
-                    <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={isMuted ? 0 : volume}
-                        onChange={handleVolumeChange}
-                        className="w-20 h-1 bg-slate-300 dark:bg-slate-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-primary-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md"
-                        title="Volume"
-                    />
-                </div>
-            </div>
         </div>
     );
-}
+});

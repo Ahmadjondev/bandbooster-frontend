@@ -119,10 +119,10 @@ const OptionsBox = memo(function OptionsBox({
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {options.map((option, index) => {
-          const isUsed = !allowDuplicates && usedValues.includes(option.value);
+          const isUsed = !allowDuplicates && usedValues.includes(option.key);
           return (
             <div
-              key={`option-${option.value}-${index}`}
+              key={`option-${option.key}-${index}`}
               className={cn(
                 'flex items-start gap-2 px-3 py-2 rounded',
                 'transition-colors',
@@ -133,10 +133,10 @@ const OptionsBox = memo(function OptionsBox({
               )}
             >
               <span className="font-bold text-primary-600 dark:text-primary-400 shrink-0">
-                {option.value}.
+                {option.key}.
               </span>
               <span className="text-neutral-700 dark:text-neutral-300">
-                {option.label}
+                {option.text}
               </span>
             </div>
           );
@@ -245,8 +245,8 @@ const MatchingQuestionItem = memo(function MatchingQuestionItem({
               Select an answer...
             </option>
             {options.map((option, index) => (
-              <option key={`${question.id}-option-${option.value}-${index}`} value={option.value}>
-                {option.value}. {option.label}
+              <option key={`${question.id}-option-${option.key}-${index}`} value={option.key}>
+                {option.key}. {option.text}
               </option>
             ))}
           </select>
@@ -297,9 +297,10 @@ export const MatchingQuestion = memo(function MatchingQuestion({
 
       {/* Instructions */}
       <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500 rounded-r">
-        <p className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}>
-          {description}
-        </p>
+        <p
+          className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </div>
 
       {/* Note */}

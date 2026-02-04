@@ -117,25 +117,37 @@ const MCQOption = memo(function MCQOption({
   disabled,
   fontSize,
 }: MCQOptionProps) {
+  // Handle click without causing scroll - use onClick on label, not onChange on input
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!disabled) {
+      onSelect();
+    }
+  }, [disabled, onSelect]);
+
   return (
-    <label
+    <div
+      role="radio"
+      aria-checked={isSelected}
+      tabIndex={disabled ? -1 : 0}
+      onClick={handleClick}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       className={cn(
         'flex items-start gap-3 p-3',
         'border rounded cursor-pointer',
         'transition-colors duration-150',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1',
         isSelected
           ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500 dark:border-primary-400'
           : 'bg-white dark:bg-slate-800 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-slate-700/50',
         disabled && 'opacity-60 cursor-not-allowed'
       )}
     >
-      <input
-        type="radio"
-        checked={isSelected}
-        onChange={onSelect}
-        disabled={disabled}
-        className="sr-only"
-      />
       <RadioIndicator isSelected={isSelected} />
       <span className={cn('flex items-start gap-2 flex-1', fontSize)}>
         <OptionLetter letter={option.key} isSelected={isSelected} />
@@ -147,7 +159,7 @@ const MCQOption = memo(function MCQOption({
           dangerouslySetInnerHTML={{ __html: option.text }}
         />
       </span>
-    </label>
+    </div>
   );
 });
 
@@ -226,6 +238,7 @@ export const MCQQuestion = memo(function MCQQuestion({
   highlightedQuestionId = null,
 }: MCQProps) {
   const handleAnswer = useCallback((questionId: number, answer: string) => {
+    console.log('MCQQuestion - handleAnswer:', { questionId, answer });
     onAnswer(questionId, answer);
   }, [onAnswer]);
 
@@ -240,9 +253,10 @@ export const MCQQuestion = memo(function MCQQuestion({
 
       {/* Instructions */}
       <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500 rounded-r">
-        <p className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}>
-          {description}
-        </p>
+        <p
+          className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </div>
 
       {/* Questions */}

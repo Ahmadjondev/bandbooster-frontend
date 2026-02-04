@@ -53,13 +53,13 @@ export function BottomNav({
 }: BottomNavProps) {
     // Label based on mode
     const sectionLabel = mode === 'reading' ? 'Passage' : 'Part';
+    console.log("Started Time:", new Date().toISOString());
 
     // Auto-select first section if:
     // 1. Only one section exists, or
     // 2. No section is currently selected (activeSection is invalid)
     useEffect(() => {
         if (sections.length === 0) return;
-
         const validSectionNumbers = sections.map(s => s.sectionNumber);
         const isCurrentSelectionValid = validSectionNumbers.includes(activeSection);
 
@@ -87,6 +87,7 @@ export function BottomNav({
     const activeSectionQuestions = useMemo(() => {
         return sections.find(s => s.sectionNumber === activeSection)?.questions ?? [];
     }, [sections, activeSection]);
+    console.log("Ended Time:", new Date().toISOString());
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 w-screen h-14 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-gray-700 flex items-stretch z-40">
@@ -133,14 +134,14 @@ export function BottomNav({
                                 <div className="flex items-center gap-0.5 pr-2 sm:pr-3 overflow-x-auto">
                                     {activeSectionQuestions.map((q) => (
                                         <button
-                                            key={q.id}
+                                            key={`${q.id}-${q.order}`}
                                             onClick={() => onQuestionClick(q.id)}
                                             className={cn(
                                                 'w-6 h-6 sm:w-7 sm:h-7 text-xs font-medium rounded transition-all shrink-0',
                                                 q.isAnswered
                                                     ? 'bg-gray-700 dark:bg-gray-600 text-white'
                                                     : 'bg-white dark:bg-slate-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600',
-                                                activeQuestionId === q.id && 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-slate-900'
+                                                activeQuestionId === q.id && 'border-2 border-gray-900 dark:ring-offset-slate-900'
                                             )}
                                         >
                                             {q.order}

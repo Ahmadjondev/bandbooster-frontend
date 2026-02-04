@@ -1,7 +1,7 @@
 /**
  * IELTS Listening Practice Page
  * Pixel-perfect implementation matching official IELTS test interface
- * Features: Timer, Theme Toggle, Question Highlighting, API Submission, Result Page
+ * Features: Timer, Theme Toggle, Question Highlighting, Text Highlighting, API Submission, Result Page
  * Keyboard navigation support with Tab/Shift+Tab
  */
 
@@ -11,10 +11,12 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { PlayDialog } from '@/domains/practice/components/exam/PlayDialog';
 import { IELTSHeader } from '@/domains/practice/components/exam/IELTSHeader';
+import { AudioPlayer, type AudioPlayerHandle } from '@/domains/practice/components/exam/AudioPlayer';
 import { BottomNav, type SectionInfo as PartInfo, type QuestionInfo } from '@/domains/practice/components/exam/BottomNav';
 import { NavigationControls } from '@/domains/practice/components/exam/NavigationControls';
 import { QuestionTypeFactory, type APITestHead } from '@/domains/practice/components/exam/question-types';
-import { cn } from '@/lib/utils';
+import { HighlightProvider, HighlightToolbar, HighlightableQuestions, useHighlightContext } from '@/domains/practice/components/exam/highlight';
+import { cn, scrollToQuestionInContainer } from '@/lib/utils';
 
 // Types matching API response
 interface APIListeningContent {
@@ -118,10 +120,11 @@ export default function ListeningPracticePage() {
     const practiceUuid = params.uuid as string;
     const questionsContainerRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
+    const audioPlayerRef = useRef<AudioPlayerHandle>(null);
 
     // State
     const [showPlayDialog, setShowPlayDialog] = useState(true);
-    const [hasStarted, setHasStarted] = useState(true);
+    const [hasStarted, setHasStarted] = useState(false);
     const [rawData, setRawData] = useState<APIPracticeDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -129,6 +132,7 @@ export default function ListeningPracticePage() {
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
     // Enhanced feature state
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -137,11 +141,13 @@ export default function ListeningPracticePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Initialize dark mode from localStorage or system preference
+    // Use same key as main ThemeProvider for consistency
     useEffect(() => {
-        const savedTheme = localStorage.getItem('practice-theme');
-        if (savedTheme) {
+        const savedTheme = localStorage.getItem('bandbooster-theme');
+        if (savedTheme === 'dark' || savedTheme === 'light') {
             setIsDarkMode(savedTheme === 'dark');
         } else {
+            // For 'system' or no value, check system preference
             setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
         }
     }, []);
@@ -153,7 +159,8 @@ export default function ListeningPracticePage() {
         } else {
             document.documentElement.classList.remove('dark');
         }
-        localStorage.setItem('practice-theme', isDarkMode ? 'dark' : 'light');
+        // Sync with main theme provider key
+        localStorage.setItem('bandbooster-theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     // Fetch practice detail
@@ -194,16 +201,58 @@ export default function ListeningPracticePage() {
         return sortedContents.find(c => c.part_number === activePart) || sortedContents[0];
     }, [sortedContents, activePart]);
 
+    // Check if user has any answers (for submit validation)
+    const hasAnswers = useMemo(() => {
+        return Object.values(userAnswers).some(answer => {
+            if (Array.isArray(answer)) {
+                return answer.length > 0 && answer.some(a => a && String(a).trim() !== '');
+            }
+            return answer !== undefined && answer !== null && String(answer).trim() !== '';
+        });
+    }, [userAnswers]);
+
     // Build parts info for bottom nav
     const partsInfo: PartInfo[] = useMemo(() => {
         return sortedContents.map(content => {
             const questions: QuestionInfo[] = [];
             content.test_heads.forEach(head => {
+                const isMCMA = head.question_type === 'MCMA';
                 head.questions.forEach(q => {
                     const answer = userAnswers[q.id];
-                    const isAnswered = answer !== undefined &&
-                        (Array.isArray(answer) ? answer.length > 0 : String(answer).trim() !== '');
-                    questions.push({ id: q.id, order: q.order, isAnswered });
+
+                    if (isMCMA) {
+                        // For MCMA, expand single question into multiple based on maxSelections
+                        // Priority: q.max_selections > correct_answer length > head.select_count > 1
+                        let maxSelections = 1;
+                        if (q.max_selections) {
+                            maxSelections = typeof q.max_selections === 'string'
+                                ? parseInt(q.max_selections) || 1
+                                : q.max_selections;
+                        } else if (q.correct_answer && typeof q.correct_answer === 'string') {
+                            const letters = q.correct_answer.match(/[A-Z]/g);
+                            maxSelections = letters ? letters.length : 1;
+                        } else if (head.select_count) {
+                            maxSelections = head.select_count;
+                        }
+
+                        // Create entries for each question number (order, order+1, etc.)
+                        const selectedAnswers = Array.isArray(answer) ? answer : [];
+                        for (let i = 0; i < maxSelections; i++) {
+                            const isAnswered = selectedAnswers.length > i &&
+                                selectedAnswers[i] !== undefined &&
+                                String(selectedAnswers[i]).trim() !== '';
+                            questions.push({
+                                id: q.id,
+                                order: q.order + i,
+                                isAnswered
+                            });
+                        }
+                    } else {
+                        // Regular question - single entry
+                        const isAnswered = answer !== undefined &&
+                            (Array.isArray(answer) ? answer.length > 0 : String(answer).trim() !== '');
+                        questions.push({ id: q.id, order: q.order, isAnswered });
+                    }
                 });
             });
             return { sectionNumber: content.part_number, questions };
@@ -215,8 +264,28 @@ export default function ListeningPracticePage() {
         const questions: { id: number; order: number; partNumber: number }[] = [];
         sortedContents.forEach(content => {
             content.test_heads.forEach(head => {
+                const isMCMA = head.question_type === 'MCMA';
                 head.questions.forEach(q => {
-                    questions.push({ id: q.id, order: q.order, partNumber: content.part_number });
+                    if (isMCMA) {
+                        // For MCMA, expand based on maxSelections
+                        let maxSelections = 1;
+                        if (q.max_selections) {
+                            maxSelections = typeof q.max_selections === 'string'
+                                ? parseInt(q.max_selections) || 1
+                                : q.max_selections;
+                        } else if (q.correct_answer && typeof q.correct_answer === 'string') {
+                            const letters = q.correct_answer.match(/[A-Z]/g);
+                            maxSelections = letters ? letters.length : 1;
+                        } else if (head.select_count) {
+                            maxSelections = head.select_count;
+                        }
+
+                        for (let i = 0; i < maxSelections; i++) {
+                            questions.push({ id: q.id, order: q.order + i, partNumber: content.part_number });
+                        }
+                    } else {
+                        questions.push({ id: q.id, order: q.order, partNumber: content.part_number });
+                    }
                 });
             });
         });
@@ -250,24 +319,20 @@ export default function ListeningPracticePage() {
         setTimeout(() => setHighlightedQuestionId(null), HIGHLIGHT_DURATION);
     }, []);
 
-    // Scroll to question element
+    // Scroll to question element within the questions container
     const scrollToQuestion = useCallback((questionId: number) => {
-        const element = questionsContainerRef.current?.querySelector(`[data-question-id="${questionId}"]`);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        scrollToQuestionInContainer(questionsContainerRef, questionId, {
+            behavior: 'smooth',
+            block: 'center',
+        });
     }, []);
 
     // Handlers
     const handleStart = useCallback(() => {
         setShowPlayDialog(false);
         setHasStarted(true);
-        // Start audio playback after dialog closes
-        setTimeout(() => {
-            if (audioRef.current) {
-                audioRef.current.play().then(() => setIsAudioPlaying(true)).catch(console.error);
-            }
-        }, 300);
+        // Set flag for auto-play - AudioPlayer will handle it via autoPlay prop
+        setShouldAutoPlay(true);
     }, []);
 
     const handleBack = useCallback(() => {
@@ -370,6 +435,19 @@ export default function ListeningPracticePage() {
     const submitAnswers = useCallback(async () => {
         if (isSubmitting || !rawData) return;
 
+        // Validate at least one answer exists
+        const hasAnswers = Object.values(userAnswers).some(answer => {
+            if (Array.isArray(answer)) {
+                return answer.length > 0 && answer.some(a => a && String(a).trim() !== '');
+            }
+            return answer !== undefined && answer !== null && String(answer).trim() !== '';
+        });
+
+        if (!hasAnswers) {
+            setError('Please answer at least one question before submitting.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
@@ -443,17 +521,14 @@ export default function ListeningPracticePage() {
 
     const handleAudioEnded = useCallback(() => {
         setIsAudioPlaying(false);
-        // Auto-advance to next part
+        // Auto-advance to next part for multi-part/full-test listening
         const nextPart = sortedContents.find(c => c.part_number === activePart + 1);
         if (nextPart) {
+            // Switch to next part after a short delay
             setTimeout(() => {
                 setActivePart(nextPart.part_number);
-                // Play next part's audio
-                setTimeout(() => {
-                    if (audioRef.current) {
-                        audioRef.current.play().then(() => setIsAudioPlaying(true)).catch(console.error);
-                    }
-                }, 500);
+                // Set auto-play flag for the next part
+                setShouldAutoPlay(true);
             }, 1000);
         }
     }, [activePart, sortedContents]);
@@ -472,6 +547,124 @@ export default function ListeningPracticePage() {
             />
         );
     }
+
+    return (
+        <HighlightProvider options={{ sessionKey: practiceUuid }}>
+            <ListeningPracticeContent
+                rawData={rawData}
+                practiceUuid={practiceUuid}
+                isDarkMode={isDarkMode}
+                isSubmitting={isSubmitting}
+                showPlayDialog={showPlayDialog}
+                hasStarted={hasStarted}
+                userAnswers={userAnswers}
+                activePart={activePart}
+                activeQuestionIndex={activeQuestionIndex}
+                highlightedQuestionId={highlightedQuestionId}
+                hasAnswers={hasAnswers}
+                sortedContents={sortedContents}
+                activeContent={activeContent}
+                partsInfo={partsInfo}
+                allQuestions={allQuestions}
+                currentQuestionIndex={currentQuestionIndex}
+                activeQuestionId={activeQuestionId}
+                questionsContainerRef={questionsContainerRef}
+                audioRef={audioRef}
+                audioPlayerRef={audioPlayerRef}
+                shouldAutoPlay={shouldAutoPlay}
+                onAudioPlay={() => { setIsAudioPlaying(true); setShouldAutoPlay(false); }}
+                onAudioPause={() => setIsAudioPlaying(false)}
+                onBack={handleBack}
+                onAnswer={handleAnswer}
+                onPartChange={handlePartChange}
+                onQuestionClick={handleQuestionClick}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                onTimeUp={handleTimeUp}
+                onTimerStart={handleTimerStart}
+                onThemeToggle={handleThemeToggle}
+                onSubmit={handleSubmit}
+                onStart={handleStart}
+                onAudioEnded={handleAudioEnded}
+            />
+        </HighlightProvider>
+    );
+}
+
+// Extracted content component to use highlight context
+interface ListeningPracticeContentProps {
+    rawData: APIPracticeDetail;
+    practiceUuid: string;
+    isDarkMode: boolean;
+    isSubmitting: boolean;
+    showPlayDialog: boolean;
+    hasStarted: boolean;
+    userAnswers: Record<number, string | string[]>;
+    activePart: number;
+    activeQuestionIndex: number;
+    highlightedQuestionId: number | null;
+    hasAnswers: boolean;
+    sortedContents: APIListeningContent[];
+    activeContent: APIListeningContent | undefined;
+    partsInfo: PartInfo[];
+    allQuestions: { id: number; order: number; partNumber: number }[];
+    currentQuestionIndex: number;
+    activeQuestionId: number | null;
+    questionsContainerRef: React.RefObject<HTMLDivElement | null>;
+    audioRef: React.RefObject<HTMLAudioElement | null>;
+    audioPlayerRef: React.RefObject<AudioPlayerHandle | null>;
+    shouldAutoPlay: boolean;
+    onAudioPlay: () => void;
+    onAudioPause: () => void;
+    onBack: () => void;
+    onAnswer: (questionId: number, answer: string | string[]) => void;
+    onPartChange: (partNumber: number) => void;
+    onQuestionClick: (questionId: number) => void;
+    onPrev: () => void;
+    onNext: () => void;
+    onTimeUp: () => void;
+    onTimerStart: (startTime: Date) => void;
+    onThemeToggle: (isDark: boolean) => void;
+    onSubmit: () => void;
+    onStart: () => void;
+    onAudioEnded: () => void;
+}
+
+function ListeningPracticeContent({
+    rawData,
+    isDarkMode,
+    isSubmitting,
+    showPlayDialog,
+    hasStarted,
+    userAnswers,
+    activePart,
+    highlightedQuestionId,
+    hasAnswers,
+    activeContent,
+    partsInfo,
+    allQuestions,
+    currentQuestionIndex,
+    activeQuestionId,
+    questionsContainerRef,
+    audioRef,
+    audioPlayerRef,
+    shouldAutoPlay,
+    onAudioPlay,
+    onAudioPause,
+    onBack,
+    onAnswer,
+    onPartChange,
+    onQuestionClick,
+    onPrev,
+    onNext,
+    onTimeUp,
+    onTimerStart,
+    onThemeToggle,
+    onSubmit,
+    onStart,
+    onAudioEnded,
+}: ListeningPracticeContentProps) {
+    const { state, setActiveColor, clearAllHighlights } = useHighlightContext();
 
     return (
         <div className={cn('min-h-screen bg-white dark:bg-slate-900 flex flex-col', isDarkMode ? 'dark' : '')}>
@@ -497,44 +690,74 @@ export default function ListeningPracticePage() {
             `}</style>
 
             {/* Play Dialog Overlay */}
-            <PlayDialog isOpen={showPlayDialog} onStart={handleStart} />
+            <PlayDialog isOpen={showPlayDialog} onStart={onStart} />
 
             {/* Main Content (visible after starting) */}
             {hasStarted && (
                 <>
                     {/* Header - Fixed at top with timer, theme toggle, and submit button */}
                     <IELTSHeader
-                        onBack={handleBack}
+                        onBack={onBack}
                         timerMinutes={rawData.duration || 40}
-                        onTimeUp={handleTimeUp}
-                        onTimerStart={handleTimerStart}
+                        onTimeUp={onTimeUp}
+                        onTimerStart={onTimerStart}
                         isDarkMode={isDarkMode}
-                        onThemeToggle={handleThemeToggle}
+                        onThemeToggle={onThemeToggle}
                         showTimer={true}
                         showThemeToggle={true}
-                        onSubmit={handleSubmit}
+                        onSubmit={onSubmit}
                         showSubmit={true}
+                        hasAnswers={hasAnswers}
+                    // rightContent={
+                    //     <HighlightToolbar
+                    //         activeColor={state.activeColor}
+                    //         onColorChange={setActiveColor}
+                    //         onClearAll={clearAllHighlights}
+                    //         compact
+                    //         className="mr-2"
+                    //     />
+                    // }
                     />
 
-                    {/* Hidden Audio Element */}
+                    {/* Hidden Audio Element for programmatic control */}
                     <audio
                         ref={audioRef}
                         src={activeContent?.audio_url}
-                        onEnded={handleAudioEnded}
+                        onEnded={onAudioEnded}
                         preload="auto"
+                        className="hidden"
                     />
 
                     {/* Main scrollable content area - accounts for fixed header (h-14 = 56px), nav controls (h-12 = 48px), and bottom nav (h-14 = 56px) */}
                     <div className="pt-14 pb-26 flex-1 overflow-y-auto" ref={questionsContainerRef}>
-                        {/* Part Title Bar */}
-                        <div className="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 px-6 py-3 m-4 rounded">
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white">Part {activeContent.part_number}</h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{activeContent.description || `Listen and answer questions.`}</p>
+                        {/* Audio Player - Visible controls for practice mode */}
+                        <div className="px-4 pt-4">
+                            <AudioPlayer
+                                ref={audioPlayerRef}
+                                src={activeContent?.audio_url || ''}
+                                partNumber={activeContent?.part_number}
+                                totalParts={rawData.contents?.length || 1}
+                                autoPlay={shouldAutoPlay}
+                                onPlay={onAudioPlay}
+                                onPause={onAudioPause}
+                                onEnded={onAudioEnded}
+                                className="mb-4"
+                            />
                         </div>
 
-                        {/* Questions Content - increased spacing between question groups */}
-                        <div className="max-w-full mx-auto px-6 py-6 space-y-12">
-                            {activeContent.test_heads.map((group) => (
+                        {/* Part Title Bar */}
+                        <div className="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 px-6 py-3 mx-4 rounded">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white">Part {activeContent?.part_number}</h2>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{activeContent?.description || `Listen and answer questions.`}</p>
+                        </div>
+
+                        {/* Questions Content with Highlighting - increased spacing between question groups */}
+                        <HighlightableQuestions
+                            groupId={`listening-questions-${activeContent?.part_number || 1}`}
+                            className="max-w-full mx-auto px-6 py-6 space-y-12"
+                            enabled={true}
+                        >
+                            {activeContent?.test_heads.map((group) => (
                                 <div
                                     key={group.id}
                                     className="question-group-wrapper"
@@ -542,19 +765,19 @@ export default function ListeningPracticePage() {
                                     <QuestionTypeFactory
                                         group={group}
                                         userAnswers={userAnswers}
-                                        onAnswer={handleAnswer}
+                                        onAnswer={onAnswer}
                                         mode="listening"
                                         highlightedQuestionId={highlightedQuestionId}
                                     />
                                 </div>
                             ))}
-                        </div>
+                        </HighlightableQuestions>
                     </div>
 
                     {/* Navigation Controls - positioned above bottom nav, right-aligned */}
                     <NavigationControls
-                        onPrev={handlePrev}
-                        onNext={handleNext}
+                        onPrev={onPrev}
+                        onNext={onNext}
                         canGoPrev={currentQuestionIndex > 0}
                         canGoNext={currentQuestionIndex < allQuestions.length - 1}
                     />
@@ -564,8 +787,8 @@ export default function ListeningPracticePage() {
                         sections={partsInfo}
                         activeSection={activePart}
                         activeQuestionId={activeQuestionId}
-                        onSectionChange={handlePartChange}
-                        onQuestionClick={handleQuestionClick}
+                        onSectionChange={onPartChange}
+                        onQuestionClick={onQuestionClick}
                         mode="listening"
                     />
                 </>

@@ -119,6 +119,13 @@
   --color-accent-900: var(--accent-900);
 }
 
+@layer components {
+  .p {
+    @apply mb-4;
+  }
+}
+
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -193,4 +200,52 @@ html {
 .dark .glass {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   CD-IELTS Style Text Highlighting
+   ============================================ */
+
+/* Base highlight styles */
+.note-highlight {
+  cursor: pointer;
+  border-radius: 2px;
+  transition: filter 0.15s ease;
+}
+
+.note-highlight:hover {
+  filter: brightness(0.95);
+}
+
+/* Yellow highlight */
+.note-highlight-yellow {
+  background-color: rgba(250, 204, 21, 0.5);
+}
+
+.dark .note-highlight-yellow {
+  background-color: rgba(250, 204, 21, 0.35);
+}
+
+/* Green highlight */
+.note-highlight-green {
+  background-color: rgba(74, 222, 128, 0.5);
+}
+
+.dark .note-highlight-green {
+  background-color: rgba(74, 222, 128, 0.35);
+}
+
+/* Highlightable content container */
+.highlightable-content {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Selection styling for highlightable content */
+.highlightable-content ::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+.dark .highlightable-content ::selection {
+  background-color: rgba(59, 130, 246, 0.4);
 }

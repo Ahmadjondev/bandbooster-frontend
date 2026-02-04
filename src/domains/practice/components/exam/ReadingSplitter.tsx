@@ -125,13 +125,33 @@ export const ReadingSplitter = memo(function ReadingSplitter({
         >
             {/* Visual indicator / grip */}
             <div
-                className={cn(
-                    'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-                    'w-1 h-8 rounded-full',
-                    'bg-gray-400 dark:bg-gray-500',
-                    isDragging && 'bg-white dark:bg-gray-200'
-                )}
-            />
+                className="
+    absolute left-1/2 top-1/2 
+    -translate-x-1/2 -translate-y-1/2
+    w-6 h-6 rounded-full
+    bg-white border-2 border-gray-400
+    shadow-md
+    flex items-center justify-center
+    cursor-col-resize
+    hover:border-gray-600 hover:shadow-lg
+    transition-all
+  "
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-3 h-3 text-gray-600"
+                >
+                    <path d="m9 7-5 5 5 5" />
+                    <path d="m15 7 5 5-5 5" />
+                </svg>
+            </div>
+
         </div>
     );
 });

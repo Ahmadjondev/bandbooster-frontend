@@ -44,3 +44,6 @@ export { PracticeResultPage, type PracticeResultPageProps, type SubmitResponse, 
 // Question type components (CD-IELTS authentic)
 export * from './question-types';
 
+// Text Highlighting (CD-IELTS style)
+export * from './highlight';
+

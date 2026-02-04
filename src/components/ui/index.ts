@@ -15,3 +15,6 @@ export { Divider, SocialButton, Logo, Spinner, LoadingOverlay } from './Shared';
 // Theme
 export { ThemeProvider, useTheme, useMounted } from './ThemeProvider';
 export { ThemeToggle, ThemeSelector } from './ThemeToggle';
+
+// Icons
+export * from './icons';

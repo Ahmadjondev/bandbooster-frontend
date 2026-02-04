@@ -311,9 +311,10 @@ export const TCQuestion = memo(function TCQuestion({
 
       {/* Instructions */}
       <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500 rounded-r">
-        <p className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}>
-          {description}
-        </p>
+        <p
+          className={cn('text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap', fontSize)}
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </div>
 
       {/* Table */}

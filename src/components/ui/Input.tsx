@@ -120,10 +120,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                             (rightIcon || showPasswordToggle) && 'pr-10',
                             // States
                             hasError
-                                ? 'border-error-500 focus:border-error-500 focus:ring-4 focus:ring-error-500/20'
+                                ? 'border-error-500 focus:border-error-500 focus:ring-2 focus:ring-error-500/20'
                                 : hasSuccess
-                                    ? 'border-success-500 focus:border-success-500 focus:ring-4 focus:ring-success-500/20'
-                                    : 'border-neutral-200 dark:border-neutral-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20',
+                                    ? 'border-success-500 focus:border-success-500 focus:ring-2  focus:ring-success-500/20'
+                                    : 'border-neutral-200 dark:border-neutral-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20',
                             // Text color
                             'text-neutral-900 dark:text-white',
                             // Disabled
