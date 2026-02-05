@@ -227,7 +227,7 @@ const MatchingQuestionItem = memo(function MatchingQuestionItem({
             disabled={disabled}
             className={cn(
               'w-full max-w-xs appearance-none',
-              'px-4 py-2.5 pr-10',
+              'px-4 py-2 pr-10',
               'border-2 rounded',
               'font-medium',
               'transition-colors duration-150',

@@ -31,11 +31,65 @@ function getTextNodesIn(node: Node): Text[] {
   return textNodes;
 }
 
+/**
+ * Find the text node and offset for a given boundary point
+ * Handles cases where the container is an element, not a text node
+ */
+function resolveRangeBoundary(
+  container: Node,
+  offset: number
+): { node: Node; offset: number } | null {
+  // If it's already a text node, return it directly
+  if (container.nodeType === Node.TEXT_NODE) {
+    return { node: container, offset };
+  }
+  
+  // If it's an element, try to find the text node at the offset
+  if (container.nodeType === Node.ELEMENT_NODE) {
+    const element = container as Element;
+    
+    // If offset points to a child node
+    if (offset < element.childNodes.length) {
+      const child = element.childNodes[offset];
+      if (child.nodeType === Node.TEXT_NODE) {
+        return { node: child, offset: 0 };
+      }
+      // If child is an element, get the first text node inside
+      const textNodes = getTextNodesIn(child);
+      if (textNodes.length > 0) {
+        return { node: textNodes[0], offset: 0 };
+      }
+    }
+    
+    // Fallback: get all text nodes and find position
+    const textNodes = getTextNodesIn(element);
+    if (textNodes.length > 0) {
+      // Return the last text node if offset is at the end
+      const lastNode = textNodes[textNodes.length - 1];
+      return { node: lastNode, offset: lastNode.textContent?.length ?? 0 };
+    }
+  }
+  
+  return null;
+}
+
 function getSelectionOffsets(
   container: Element,
   range: Range
 ): { startOffset: number; endOffset: number; text: string } | null {
+  // Get all text nodes in the container
   const textNodes = getTextNodesIn(container);
+  if (textNodes.length === 0) return null;
+  
+  // Resolve the start and end boundaries
+  const startBoundary = resolveRangeBoundary(range.startContainer, range.startOffset);
+  const endBoundary = resolveRangeBoundary(range.endContainer, range.endOffset);
+  
+  if (!startBoundary || !endBoundary) {
+    // Try alternative method using text content matching
+    return getSelectionOffsetsAlt(container, range);
+  }
+  
   let totalOffset = 0;
   let startOffset = -1;
   let endOffset = -1;
@@ -43,27 +97,64 @@ function getSelectionOffsets(
   for (const textNode of textNodes) {
     const nodeLength = textNode.textContent?.length || 0;
     
-    if (textNode === range.startContainer) {
-      startOffset = totalOffset + range.startOffset;
+    // Check if this is the start node
+    if (textNode === startBoundary.node || textNode.isSameNode(startBoundary.node)) {
+      startOffset = totalOffset + startBoundary.offset;
     }
     
-    if (textNode === range.endContainer) {
-      endOffset = totalOffset + range.endOffset;
-      break;
+    // Check if this is the end node
+    if (textNode === endBoundary.node || textNode.isSameNode(endBoundary.node)) {
+      endOffset = totalOffset + endBoundary.offset;
     }
     
     totalOffset += nodeLength;
   }
   
-  if (startOffset >= 0 && endOffset >= 0 && startOffset < endOffset) {
-    return {
-      startOffset,
-      endOffset,
-      text: range.toString(),
-    };
+  // If we still couldn't find the offsets, try the alternative method
+  if (startOffset < 0 || endOffset < 0 || startOffset >= endOffset) {
+    return getSelectionOffsetsAlt(container, range);
   }
   
-  return null;
+  return {
+    startOffset,
+    endOffset,
+    text: range.toString(),
+  };
+}
+
+/**
+ * Alternative method to get selection offsets using text content matching
+ * More robust for complex DOM structures
+ */
+function getSelectionOffsetsAlt(
+  container: Element,
+  range: Range
+): { startOffset: number; endOffset: number; text: string } | null {
+  const selectedText = range.toString();
+  if (!selectedText.trim()) return null;
+  
+  const containerText = container.textContent || '';
+  if (!containerText) return null;
+  
+  // Create a range that spans from the start of the container to the start of the selection
+  const preRange = document.createRange();
+  preRange.setStart(container, 0);
+  preRange.setEnd(range.startContainer, range.startOffset);
+  
+  // The length of text before the selection gives us the start offset
+  const startOffset = preRange.toString().length;
+  const endOffset = startOffset + selectedText.length;
+  
+  // Validate offsets
+  if (startOffset < 0 || endOffset > containerText.length || startOffset >= endOffset) {
+    return null;
+  }
+  
+  return {
+    startOffset,
+    endOffset,
+    text: selectedText,
+  };
 }
 
 function loadFromStorage(sessionKey?: string): HighlightState {

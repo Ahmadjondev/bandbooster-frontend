@@ -168,7 +168,7 @@ export function HighlightableQuestions({
 
     // Handle text selection - show popup for explicit highlight action
     const handleMouseUp = useCallback((e: ReactMouseEvent) => {
-        // Close any existing popups first
+        // Close any existing remove popup first
         setRemovePopupPosition(null);
 
         if (!enabled) {
@@ -176,47 +176,56 @@ export function HighlightableQuestions({
             return;
         }
 
-        const selection = window.getSelection();
-        if (!selection || selection.isCollapsed) {
-            setSelectionPopupPosition(null);
-            return;
-        }
+        // Small delay to let the selection finalize
+        requestAnimationFrame(() => {
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed) {
+                setSelectionPopupPosition(null);
+                return;
+            }
 
-        const range = selection.getRangeAt(0);
-        const selectedText = range.toString().trim();
+            const range = selection.getRangeAt(0);
+            const selectedText = range.toString().trim();
 
-        if (!selectedText) {
-            setSelectionPopupPosition(null);
-            return;
-        }
+            if (!selectedText || selectedText.length < 1) {
+                setSelectionPopupPosition(null);
+                return;
+            }
 
-        // Check if selection is within our container
-        const container = containerRef.current;
-        if (!container) {
-            setSelectionPopupPosition(null);
-            return;
-        }
+            // Check if selection is within our container
+            const container = containerRef.current;
+            if (!container) {
+                setSelectionPopupPosition(null);
+                return;
+            }
 
-        if (!container.contains(range.commonAncestorContainer)) {
-            setSelectionPopupPosition(null);
-            return;
-        }
+            if (!container.contains(range.commonAncestorContainer)) {
+                setSelectionPopupPosition(null);
+                return;
+            }
 
-        // Don't show selection popup if clicking on already highlighted text
-        const target = e.target as HTMLElement;
-        if (target.classList.contains('note-highlight')) {
-            setSelectionPopupPosition(null);
-            return;
-        }
+            // Don't show selection popup if clicking on already highlighted text
+            const target = e.target as HTMLElement;
+            if (target.classList.contains('note-highlight')) {
+                setSelectionPopupPosition(null);
+                return;
+            }
 
-        // Get selection bounds to position the popup
-        const selectionRect = range.getBoundingClientRect();
+            // Get selection bounds to position the popup
+            const selectionRect = range.getBoundingClientRect();
 
-        // Show selection popup with highlight options (NO auto-highlight)
-        setSelectionPopupPosition({
-            x: selectionRect.left + selectionRect.width / 2,
-            y: selectionRect.bottom + 8,
-            range: range.cloneRange(), // Clone range to preserve it
+            // Validate that the rect is valid
+            if (selectionRect.width === 0 && selectionRect.height === 0) {
+                setSelectionPopupPosition(null);
+                return;
+            }
+
+            // Show selection popup with highlight options
+            setSelectionPopupPosition({
+                x: selectionRect.left + selectionRect.width / 2,
+                y: selectionRect.bottom + 8,
+                range: range.cloneRange(), // Clone range to preserve it
+            });
         });
     }, [enabled]);
 

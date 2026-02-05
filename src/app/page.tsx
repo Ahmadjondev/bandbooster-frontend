@@ -15,10 +15,11 @@ import {
   Zap,
   ArrowRight,
   Sparkles,
-  Play,
+  Mail,
   CheckCircle2,
   MousePointer,
   Rocket,
+  Bell,
 } from "lucide-react";
 import { Header, Footer } from "@/components/layout";
 import { Button } from "@/components/ui";
@@ -174,20 +175,23 @@ export default function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950 text-neutral-900 dark:text-white overflow-x-hidden transition-colors duration-500">
       <Header />
 
       {/* Hero Section */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          {/* Base gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-100 dark:from-primary-900/30 via-white dark:via-neutral-950 to-white dark:to-neutral-950" />
+          {/* Base gradient - enhanced for both modes */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-100/80 via-slate-50 to-white dark:from-primary-900/40 dark:via-neutral-900 dark:to-neutral-950" />
 
-          {/* Floating orbs */}
-          <GlowingOrb className="top-1/4 -left-32 w-[500px] h-[500px] bg-primary-400/20 dark:bg-primary-500/30" />
-          <GlowingOrb className="bottom-1/4 -right-32 w-[500px] h-[500px] bg-accent-400/15 dark:bg-accent-500/25" delay={2} />
-          <GlowingOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-500/10 dark:bg-primary-600/15" delay={4} />
+          {/* Secondary ambient gradient */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-accent-100/40 via-transparent to-transparent dark:from-accent-900/20 dark:via-transparent dark:to-transparent" />
+
+          {/* Floating orbs - adjusted opacity for better visibility */}
+          <GlowingOrb className="top-1/4 -left-32 w-[500px] h-[500px] bg-primary-400/25 dark:bg-primary-500/20" />
+          <GlowingOrb className="bottom-1/4 -right-32 w-[500px] h-[500px] bg-accent-400/20 dark:bg-accent-500/15" delay={2} />
+          <GlowingOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-500/15 dark:bg-primary-600/10" delay={4} />
 
           {/* Floating particles */}
           {mounted && particles.map((particle) => (
@@ -195,8 +199,8 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:72px_72px]" />
+        {/* Subtle grid pattern - improved contrast */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:72px_72px]" />
 
         {/* Content */}
         <motion.div
@@ -209,15 +213,15 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 backdrop-blur-md mb-10"
+              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/80 dark:bg-white/5 border border-neutral-200/80 dark:border-white/10 backdrop-blur-xl shadow-lg shadow-primary-500/5 dark:shadow-none mb-10"
             >
               <motion.div
                 animate={{ rotate: [0, 15, -15, 0] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
               >
-                <Sparkles className="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                <Sparkles className="w-4 h-4 text-primary-600 dark:text-primary-400" />
               </motion.div>
-              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">AI-Powered IELTS Preparation</span>
+              <span className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">AI-Powered IELTS Preparation</span>
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
             </motion.div>
 
@@ -249,19 +253,19 @@ export default function HomePage() {
               and creates a personalized path to your target band score.
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* CTA Button */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
+              className="flex justify-center items-center mb-16"
             >
               <Link href="/register">
                 <Button
                   size="lg"
                   className={cn(
                     "bg-linear-to-r from-primary-500 to-accent-500 hover:from-primary-400 hover:to-accent-400",
-                    "text-white font-semibold px-8 py-6 text-lg rounded-2xl",
+                    "text-white font-semibold px-10 py-6 text-lg rounded-2xl",
                     "shadow-2xl shadow-primary-500/30 hover:shadow-primary-500/40",
                     "transition-all duration-300 group"
                   )}
@@ -270,14 +274,6 @@ export default function HomePage() {
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-neutral-300 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/10 px-8 py-6 text-lg rounded-2xl group"
-              >
-                <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Watch Demo
-              </Button>
             </motion.div>
 
             {/* Trust Indicators */}
@@ -320,7 +316,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative py-32 scroll-mt-20 bg-neutral-50 dark:bg-transparent">
+      <section id="features" className="relative py-32 scroll-mt-20 bg-gradient-to-b from-slate-100/80 via-slate-50 to-white dark:from-neutral-900/50 dark:via-neutral-900 dark:to-transparent">
         <div className="container mx-auto px-4">
           {/* Section Header */}
           <motion.div
@@ -334,7 +330,7 @@ export default function HomePage() {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100/80 dark:bg-primary-500/10 border border-primary-200/80 dark:border-primary-500/20 text-primary-700 dark:text-primary-400 text-sm font-semibold mb-6 shadow-sm shadow-primary-500/10 dark:shadow-none"
             >
               <span className="w-2 h-2 rounded-full bg-primary-500 dark:bg-primary-400 animate-pulse" />
               All 4 Modules
@@ -368,7 +364,7 @@ export default function HomePage() {
                   style={{ transform: "scale(0.8)" }}
                 />
 
-                <div className="relative h-full p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-all duration-500  dark:shadow-none">
+                <div className="relative h-full p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200/80 dark:border-white/10 hover:border-primary-200 dark:hover:border-white/20 hover:bg-slate-50/80 dark:hover:bg-white/[0.05] transition-all duration-500 shadow-xl shadow-neutral-200/50 hover:shadow-2xl hover:shadow-primary-500/10 dark:shadow-none">
                   {/* Icon */}
                   <div
                     className={cn(
@@ -385,9 +381,9 @@ export default function HomePage() {
                   <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed">{feature.description}</p>
 
                   {/* Arrow indicator */}
-                  <div className="mt-6 flex items-center text-neutral-400 dark:text-neutral-500 group-hover:text-primary-600 dark:group-hover:text-white transition-colors">
-                    <span className="text-sm font-medium">Learn more</span>
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <div className="mt-6 flex items-center text-neutral-500 dark:text-neutral-500 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    <span className="text-sm font-semibold">Learn more</span>
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1.5 transition-transform" />
                   </div>
                 </div>
               </motion.div>
@@ -400,9 +396,9 @@ export default function HomePage() {
       <section id="how-it-works" className="relative py-32 overflow-hidden scroll-mt-20">
         {/* Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-linear-to-b from-white dark:from-neutral-950 via-primary-50 dark:via-primary-950/10 to-white dark:to-neutral-950" />
-          <GlowingOrb className="top-1/2 left-1/4 w-[400px] h-[400px] bg-primary-400/10 dark:bg-primary-500/10" delay={1} />
-          <GlowingOrb className="bottom-1/4 right-1/4 w-[350px] h-[350px] bg-accent-400/10 dark:bg-accent-500/10" delay={3} />
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-primary-50/50 to-white dark:from-neutral-900 dark:via-primary-950/20 dark:to-neutral-900" />
+          <GlowingOrb className="top-1/2 left-1/4 w-[400px] h-[400px] bg-primary-400/15 dark:bg-primary-500/10" delay={1} />
+          <GlowingOrb className="bottom-1/4 right-1/4 w-[350px] h-[350px] bg-accent-400/15 dark:bg-accent-500/10" delay={3} />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -418,7 +414,7 @@ export default function HomePage() {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-100 dark:bg-accent-500/10 border border-accent-200 dark:border-accent-500/20 text-accent-600 dark:text-accent-400 text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-100/80 dark:bg-accent-500/10 border border-accent-200/80 dark:border-accent-500/20 text-accent-700 dark:text-accent-400 text-sm font-semibold mb-6 shadow-sm shadow-accent-500/10 dark:shadow-none"
             >
               <span className="w-2 h-2 rounded-full bg-accent-500 dark:bg-accent-400 animate-pulse" />
               Simple Process
@@ -459,7 +455,7 @@ export default function HomePage() {
 
                 {/* Content Card */}
                 <div className="flex-1 group">
-                  <div className="p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-all duration-300  dark:shadow-none">
+                  <div className="p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200/80 dark:border-white/10 hover:border-primary-200 dark:hover:border-white/20 hover:bg-slate-50/80 dark:hover:bg-white/[0.05] transition-all duration-300 shadow-xl shadow-neutral-200/50 hover:shadow-2xl hover:shadow-primary-500/10 dark:shadow-none">
                     <div className="flex items-start gap-5">
                       <div
                         className={cn(
@@ -485,7 +481,7 @@ export default function HomePage() {
       </section>
 
       {/* AI Features Section */}
-      <section className="relative py-32 bg-neutral-50 dark:bg-transparent">
+      <section className="relative py-32 bg-gradient-to-b from-slate-100/80 via-slate-50 to-white dark:from-neutral-900/50 dark:via-neutral-900 dark:to-transparent">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Left - Content */}
@@ -499,7 +495,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100/80 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-semibold mb-6 shadow-sm shadow-emerald-500/10 dark:shadow-none"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                 AI Technology
@@ -520,7 +516,7 @@ export default function HomePage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="group flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:bg-neutral-50 dark:hover:bg-white/[0.06] hover:border-neutral-300 dark:hover:border-white/20 transition-all duration-300  dark:shadow-none"
+                    className="group flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-white/[0.03] border border-neutral-200/80 dark:border-white/10 hover:bg-slate-50/80 dark:hover:bg-white/[0.06] hover:border-emerald-200 dark:hover:border-white/20 transition-all duration-300 shadow-lg shadow-neutral-200/40 hover:shadow-xl hover:shadow-emerald-500/10 dark:shadow-none"
                   >
                     <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary-100 dark:from-primary-500/20 to-accent-100 dark:to-accent-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                       <feature.icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
@@ -545,7 +541,7 @@ export default function HomePage() {
               {/* Background glow */}
               <div className="absolute inset-0 bg-linear-to-r from-primary-400/20 dark:from-primary-500/20 to-accent-400/20 dark:to-accent-500/20 blur-3xl rounded-full scale-75" />
 
-              <div className="relative p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 backdrop-blur-sm shadow-xl dark:shadow-none">
+              <div className="relative p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200/80 dark:border-white/10 backdrop-blur-sm shadow-2xl shadow-neutral-200/60 dark:shadow-none">
                 {/* Score Display */}
                 <div className="space-y-4">
                   {[
@@ -554,7 +550,7 @@ export default function HomePage() {
                     { label: "Listening", score: 8.0, width: "89%", gradient: "from-blue-500 to-cyan-500" },
                     { label: "Reading", score: 6.5, width: "72%", gradient: "from-violet-500 to-purple-500" },
                   ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-neutral-50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/[0.07] transition-colors">
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/[0.07] transition-colors">
                       <span className="text-neutral-600 dark:text-neutral-400">{item.label}</span>
                       <div className="flex items-center gap-3">
                         <div className="w-32 h-2.5 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
@@ -599,7 +595,7 @@ export default function HomePage() {
       {/* About / Stats Section */}
       <section id="about" className="relative py-32 overflow-hidden scroll-mt-20">
         {/* Background */}
-        <div className="absolute inset-0 bg-linear-to-b from-white dark:from-neutral-950 via-accent-50 dark:via-accent-950/10 to-white dark:to-neutral-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-accent-50/50 to-white dark:from-neutral-900 dark:via-accent-950/20 dark:to-neutral-900" />
 
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
@@ -612,7 +608,7 @@ export default function HomePage() {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100/80 dark:bg-primary-500/10 border border-primary-200/80 dark:border-primary-500/20 text-primary-700 dark:text-primary-400 text-sm font-semibold mb-6 shadow-sm shadow-primary-500/10 dark:shadow-none"
             >
               <span className="w-2 h-2 rounded-full bg-primary-500 dark:bg-primary-400 animate-pulse" />
               About Bandbooster
@@ -639,7 +635,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ scale: 1.02 }}
-                  className="group p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 transition-all duration-300  dark:shadow-none"
+                  className="group p-8 rounded-3xl bg-white dark:bg-white/[0.03] border border-neutral-200/80 dark:border-white/10 hover:border-primary-200 dark:hover:border-white/20 transition-all duration-300 shadow-xl shadow-neutral-200/50 hover:shadow-2xl hover:shadow-primary-500/10 dark:shadow-none"
                 >
                   <div className="text-5xl md:text-6xl font-black gradient-text mb-3">{stat.value}</div>
                   <div className="text-neutral-900 dark:text-white text-lg font-semibold mb-1">{stat.label}</div>
@@ -651,8 +647,69 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Stay Updated Section */}
+      <section className="relative py-24 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/80 dark:from-neutral-900 dark:via-neutral-900/80 dark:to-neutral-900/50">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-2xl mx-auto text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+              className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-500/20 dark:to-accent-500/20 flex items-center justify-center shadow-lg shadow-primary-500/10 dark:shadow-none"
+            >
+              <Bell className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+            </motion.div>
+
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-neutral-900 dark:text-white">
+              Stay Updated
+            </h2>
+            <p className="text-neutral-600 dark:text-neutral-400 text-lg mb-8 leading-relaxed">
+              Get notified about new features, IELTS tips, and exclusive practice materials. No spam, ever.
+            </p>
+
+            {/* Email Form */}
+            <motion.form
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <div className="relative flex-1">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full pl-12 pr-4 py-4 rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent shadow-lg shadow-neutral-200/40 dark:shadow-none transition-all"
+                />
+              </div>
+              <Button
+                type="submit"
+                size="lg"
+                className="bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-400 hover:to-accent-400 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/35 transition-all duration-300 group whitespace-nowrap"
+              >
+                Subscribe
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.form>
+
+            <p className="text-sm text-neutral-500 dark:text-neutral-500 mt-4">
+              Join our community. Unsubscribe anytime.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="relative py-32 bg-neutral-50 dark:bg-transparent">
+      <section className="relative py-32 bg-gradient-to-b from-slate-100/80 via-slate-50 to-slate-100/50 dark:from-neutral-900/50 dark:via-neutral-900 dark:to-neutral-900/80">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 40 }}

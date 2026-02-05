@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
 
 // ============= Types =============
@@ -43,7 +43,7 @@ export interface BottomNavProps {
 
 // ============= Component =============
 
-export function BottomNav({
+function BottomNavInner({
     sections,
     activeSection,
     activeQuestionId,
@@ -53,24 +53,29 @@ export function BottomNav({
 }: BottomNavProps) {
     // Label based on mode
     const sectionLabel = mode === 'reading' ? 'Passage' : 'Part';
-    console.log("Started Time:", new Date().toISOString());
 
     // Auto-select first section if:
     // 1. Only one section exists, or
     // 2. No section is currently selected (activeSection is invalid)
+    // Use ref to track if we've already triggered to avoid loops
+    const hasAutoSelectedRef = useMemo(() => ({ current: false }), []);
+
     useEffect(() => {
         if (sections.length === 0) return;
         const validSectionNumbers = sections.map(s => s.sectionNumber);
         const isCurrentSelectionValid = validSectionNumbers.includes(activeSection);
 
         // If only one section or current selection is invalid, select first
-        if (sections.length === 1 || !isCurrentSelectionValid) {
+        if ((sections.length === 1 || !isCurrentSelectionValid) && !hasAutoSelectedRef.current) {
             const firstSection = sections[0];
             if (firstSection && firstSection.sectionNumber !== activeSection) {
+                hasAutoSelectedRef.current = true;
                 onSectionChange(firstSection.sectionNumber);
             }
+        } else if (isCurrentSelectionValid) {
+            hasAutoSelectedRef.current = false;
         }
-    }, [sections, activeSection, onSectionChange]);
+    }, [sections, activeSection, onSectionChange, hasAutoSelectedRef]);
 
     // Get stats per section
     const sectionStats = useMemo(() => {
@@ -87,7 +92,18 @@ export function BottomNav({
     const activeSectionQuestions = useMemo(() => {
         return sections.find(s => s.sectionNumber === activeSection)?.questions ?? [];
     }, [sections, activeSection]);
-    console.log("Ended Time:", new Date().toISOString());
+
+    // Memoized handlers for section buttons
+    const handleSectionClick = useCallback((sectionNumber: number) => {
+        if (sectionNumber !== activeSection) {
+            onSectionChange(sectionNumber);
+        }
+    }, [activeSection, onSectionChange]);
+
+    // Memoized handler for question buttons
+    const handleQuestionClick = useCallback((questionId: number) => {
+        onQuestionClick(questionId);
+    }, [onQuestionClick]);
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 w-screen h-14 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-gray-700 flex items-stretch z-40">
@@ -102,21 +118,22 @@ export function BottomNav({
                         <div
                             key={section.sectionNumber}
                             className={cn(
-                                'h-full flex items-center justify-center flex-1 transition-colors',
+                                'flex-1 h-full flex items-center items-stretch min-w-0 transition-colors',
                                 !isLast && 'border-r border-gray-200 dark:border-gray-700',
                                 isActive
                                     ? 'bg-gray-100 dark:bg-slate-800'
                                     : 'hover:bg-gray-50 dark:hover:bg-slate-800/50'
                             )}
                         >
-                            {/* Section Label Button */}
+                            {/* Section label - clickable to switch sections */}
                             <button
-                                onClick={() => onSectionChange(section.sectionNumber)}
+                                type="button"
+                                onClick={() => handleSectionClick(section.sectionNumber)}
                                 className={cn(
                                     'h-full px-2 sm:px-3 flex items-center gap-1 sm:gap-2 text-sm font-medium transition-colors',
                                     isActive
-                                        ? 'text-gray-900 dark:text-white'
-                                        : 'text-gray-600 dark:text-gray-400'
+                                        ? 'shrink-0 text-gray-900 dark:text-white'
+                                        : 'flex-1 w-full justify-center text-gray-600 dark:text-gray-400'
                                 )}
                             >
                                 <span className="whitespace-nowrap">
@@ -129,13 +146,17 @@ export function BottomNav({
                                 )}
                             </button>
 
-                            {/* Question Numbers (only for active section) */}
+                            {/* Question Numbers - separate from section button (only for active section) */}
                             {isActive && activeSectionQuestions.length > 0 && (
-                                <div className="flex items-center gap-0.5 pr-2 sm:pr-3 overflow-x-auto">
+                                <div className="flex items-center gap-0.5 pr-2 sm:pr-3 overflow-x-auto flex-1 min-w-0">
                                     {activeSectionQuestions.map((q) => (
                                         <button
+                                            type="button"
                                             key={`${q.id}-${q.order}`}
-                                            onClick={() => onQuestionClick(q.id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleQuestionClick(q.id);
+                                            }}
                                             className={cn(
                                                 'w-6 h-6 sm:w-7 sm:h-7 text-xs font-medium rounded transition-all shrink-0',
                                                 q.isAnswered
@@ -156,6 +177,9 @@ export function BottomNav({
         </nav>
     );
 }
+
+// Memoized BottomNav to prevent unnecessary re-renders
+export const BottomNav = memo(BottomNavInner);
 
 // ============= Legacy Compatibility Exports =============
 

@@ -92,7 +92,7 @@
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
   --color-text-inverted: var(--text-inverted);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   
   /* Custom colors */
@@ -123,6 +123,15 @@
   .p {
     @apply mb-4;
   }
+}
+
+/* Global paragraph spacing for better readability in passages */
+p {
+  margin-bottom: 0.75em;
+}
+
+p:last-child {
+  margin-bottom: 0;
 }
 
 
