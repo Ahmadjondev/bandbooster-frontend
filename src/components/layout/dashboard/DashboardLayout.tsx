@@ -38,6 +38,7 @@ interface UserData {
   name: string;
   email: string;
   isPremium: boolean;
+  role: string;
 }
 
 // Custom hook for loading user from localStorage - uses useState to avoid infinite loop
@@ -57,6 +58,7 @@ function useUser(): UserData | null {
           name: userData.first_name || userData.username || 'Student',
           email: userData.email || 'student@example.com',
           isPremium: userData.is_premium || false,
+          role: userData.role || 'student',
         });
       } catch {
         setUser(null);
