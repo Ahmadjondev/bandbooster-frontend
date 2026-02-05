@@ -103,23 +103,23 @@ const navigation: NavSection[] = [
     items: [
       { id: 'reading', label: 'Reading', href: '/dashboard/practice/reading', icon: 'reading', color: 'text-emerald-500' },
       { id: 'listening', label: 'Listening', href: '/dashboard/practice/listening', icon: 'listening', color: 'text-blue-500' },
-      { id: 'writing', label: 'Writing', href: '/dashboard/practice/writing', icon: 'writing', color: 'text-purple-500', badge: 'Soon' },
-      { id: 'speaking', label: 'Speaking', href: '/dashboard/practice/speaking', icon: 'speaking', color: 'text-orange-500', badge: 'Soon' },
+      // { id: 'writing', label: 'Writing', href: '/dashboard/practice/writing', icon: 'writing', color: 'text-purple-500', badge: 'Soon' },
+      // { id: 'speaking', label: 'Speaking', href: '/dashboard/practice/speaking', icon: 'speaking', color: 'text-orange-500', badge: 'Soon' },
     ],
   },
-  {
-    title: 'Progress',
-    items: [
-      { id: 'history', label: 'History', href: '/dashboard/history', icon: 'history' },
-      { id: 'stats', label: 'Statistics', href: '/dashboard/stats', icon: 'stats' },
-    ],
-  },
-  {
-    title: 'Account',
-    items: [
-      { id: 'settings', label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
-    ],
-  },
+  // {
+  //   title: 'Progress',
+  //   items: [
+  //     { id: 'history', label: 'History', href: '/dashboard/history', icon: 'history' },
+  //     { id: 'stats', label: 'Statistics', href: '/dashboard/stats', icon: 'stats' },
+  //   ],
+  // },
+  // {
+  //   title: 'Account',
+  //   items: [
+  //     { id: 'settings', label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
+  //   ],
+  // },
 ];
 
 interface SidebarProps {

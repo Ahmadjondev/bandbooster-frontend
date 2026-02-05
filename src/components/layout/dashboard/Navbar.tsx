@@ -75,6 +75,7 @@ interface User {
   email: string;
   avatar?: string;
   isPremium?: boolean;
+  role: string;
 }
 
 interface Notification {
@@ -183,6 +184,7 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
     name: 'Student',
     email: 'student@example.com',
     isPremium: false,
+    role: 'student',
   };
 
   const currentUser = user || defaultUser;
@@ -258,9 +260,24 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
             >
               <icons.search className="w-5 h-5" />
             </motion.button>
-
+            {(currentUser.role === 'manager') && (
+              <Link href="/manager/classroom">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={cn(
+                    'hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all',
+                    pathname?.startsWith('/manager')
+                      ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
+                      : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400'
+                  )}
+                >
+                  <icons.classroom className="w-4 h-4" />
+                  <span>Manager Room</span>
+                </motion.button>
+              </Link>)}
             {/* Teacher Room Button */}
-            <Link href="/teacher/classroom">
+            {/* <Link href="/teacher/classroom">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -274,13 +291,13 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
                 <icons.classroom className="w-4 h-4" />
                 <span>Teacher Room</span>
               </motion.button>
-            </Link>
+            </Link> */}
 
             {/* Theme Toggle */}
             <ThemeToggle size="sm" />
 
             {/* Notifications */}
-            <div ref={notificationsRef} className="relative">
+            {/* <div ref={notificationsRef} className="relative">
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
@@ -305,7 +322,6 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
                 )}
               </motion.button>
 
-              {/* Notifications Dropdown */}
               <AnimatePresence>
                 {isNotificationsOpen && (
                   <motion.div
@@ -377,7 +393,7 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </div> */}
 
             {/* Profile */}
             <div ref={profileRef} className="relative">
@@ -480,53 +496,55 @@ export function Navbar({ user, onMenuToggle, isMobileMenuOpen }: NavbarProps) {
             </div>
           </div>
         </div>
-      </motion.header>
+      </motion.header >
 
       {/* Mobile Search Overlay */}
       <AnimatePresence>
-        {isSearchOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 md:hidden"
-            onClick={() => setIsSearchOpen(false)}
-          >
+        {
+          isSearchOpen && (
             <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -20, opacity: 0 }}
-              className="bg-white dark:bg-neutral-900 p-4"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 md:hidden"
+              onClick={() => setIsSearchOpen(false)}
             >
-              <div className="flex items-center gap-3">
-                <div className="flex-1 relative">
-                  <icons.search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                  <input
-                    type="text"
-                    placeholder="Search practices..."
-                    autoFocus
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={cn(
-                      'w-full pl-10 pr-4 py-3 rounded-xl text-base',
-                      'bg-neutral-100 dark:bg-neutral-800',
-                      'text-neutral-900 dark:text-white placeholder-neutral-400',
-                      'outline-none'
-                    )}
-                  />
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                className="bg-white dark:bg-neutral-900 p-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 relative">
+                    <icons.search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                    <input
+                      type="text"
+                      placeholder="Search practices..."
+                      autoFocus
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className={cn(
+                        'w-full pl-10 pr-4 py-3 rounded-xl text-base',
+                        'bg-neutral-100 dark:bg-neutral-800',
+                        'text-neutral-900 dark:text-white placeholder-neutral-400',
+                        'outline-none'
+                      )}
+                    />
+                  </div>
+                  <button
+                    onClick={() => setIsSearchOpen(false)}
+                    className="p-2 text-neutral-500"
+                  >
+                    Cancel
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsSearchOpen(false)}
-                  className="p-2 text-neutral-500"
-                >
-                  Cancel
-                </button>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )
+        }
+      </AnimatePresence >
     </>
   );
 }
